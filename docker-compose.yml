@@ -35,7 +35,6 @@ services:
     depends_on:
       - ewm-db
     environment:
-      - STATS_SERVER_URL=http://server:9090
       - DB_NAME=ewm
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=root
