@@ -27,20 +27,6 @@ services:
       - DB_HOST=stats-db
       - DB_PORT=5432
 
-  ewm-service:
-    build: ./ewm-service
-    container_name: ewm-service
-    ports:
-      - "8080:8080"
-    depends_on:
-      - ewm-db
-    environment:
-      - DB_NAME=ewm
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=root
-      - DB_HOST=ewm-db
-      - DB_PORT=5437
-
   ewm-db:
     image: postgres:14-alpine
     container_name: ewmDB
