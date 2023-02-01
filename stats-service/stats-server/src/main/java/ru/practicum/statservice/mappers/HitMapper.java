@@ -16,6 +16,4 @@ public interface HitMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     Hit partialUpdate(RequestHitDto requestHitDto, @MappingTarget Hit hit);
-
-    Hit toEntity1(RequestHitDto requestHitDto);
 }
