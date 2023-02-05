@@ -3,9 +3,11 @@ package ru.practicum;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
-public class ViewStats {
+public class ViewStats implements Serializable {
     private String app;
     private String uri;
     private Long hits;

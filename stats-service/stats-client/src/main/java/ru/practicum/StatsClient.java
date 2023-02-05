@@ -1,38 +1,28 @@
 package ru.practicum;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 
 @Service
-public class StatsClient extends BaseClient {
-    private static final String API_PREFIX = "/hit";
+@AllArgsConstructor
+public class StatsClient {
 
-    @Autowired
-    public StatsClient(@Value("${stats-service.url}") String serverUrl, RestTemplateBuilder builder) {
-        super(
-                builder
-                        .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
-                        .requestFactory(HttpComponentsClientHttpRequestFactory::new)
-                        .build()
-        );
-    }
+    private final RestTemplate restTemplate;
+/*
+{{baseUrl}}/stats?start=2020-05-05 00:00:00&end=2035-05-05 00:00:00&uris={{uri}}&unique=false
+ */
 
-    public ResponseEntity<Object> getStats(String start, String end, Collection<String> uris, boolean unique) {
-        Map<String, Object> parameters = Map.of(
-                "start", start,
-                "end", end,
-                "uris", uris,
-                "unique", unique
-        );
-
-        return get("", parameters);
+    public ArrayList<ViewStats> getStats(String start, String end, Collection<String> uris, boolean unique) {
+        String statsResourceUrl = "http://localhost:9090/stats";
+        String parameters = "?start=" + start +
+                "&end=" + end +
+                "&uris=" + uris.toString() +
+                "&unique=" + unique;
+        ArrayList<ViewStats> list = restTemplate.getForObject(statsResourceUrl + parameters, ArrayList.class, ViewStats.class);
+        return list;
     }
 }

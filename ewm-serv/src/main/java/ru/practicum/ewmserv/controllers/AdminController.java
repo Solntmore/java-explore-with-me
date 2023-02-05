@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewmserv.category.dto.RequestCategoryDto;
 import ru.practicum.ewmserv.category.dto.ResponseCategoryDto;
 import ru.practicum.ewmserv.category.service.CategoryService;
+import ru.practicum.ewmserv.event.dto.EventFullDto;
+import ru.practicum.ewmserv.event.dto.UpdateEventAdminDto;
+import ru.practicum.ewmserv.event.repository.EventRepository;
+import ru.practicum.ewmserv.event.service.EventService;
 import ru.practicum.ewmserv.user.dto.RequestUserDto;
 import ru.practicum.ewmserv.user.dto.ResponseUserDto;
 import ru.practicum.ewmserv.user.service.UserService;
@@ -21,18 +25,17 @@ import java.util.ArrayList;
 @RequiredArgsConstructor
 @RequestMapping(path = "/admin")
 public class AdminController {
+    private final EventRepository eventRepository;
 
     private final UserService userService;
-
     private final CategoryService categoryService;
+    private final EventService eventService;
 
     @PostMapping("/categories")
     public ResponseEntity<ResponseCategoryDto> postCategory(@RequestBody @Valid RequestCategoryDto requestCategoryDto) {
         log.debug("A Post/admin request was received. Post category");
 
         return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.postCategory(requestCategoryDto));
-
-
     }
 
     @DeleteMapping("/categories/{catId}")
@@ -56,9 +59,11 @@ public class AdminController {
         log.debug("A Get/admin/events request was received. Get events");
     }
 
-    @GetMapping("/events/{id}")
-    public void getEventsById(@PathVariable long id) {
-        log.debug("A Get/admin/events/{} request was received. Delete category", id);
+    @PatchMapping("/events/{eventId}")
+    public EventFullDto patchEventById(@PathVariable long eventId, @RequestBody UpdateEventAdminDto updateEventAdminDto) {
+        log.debug("A Patch/admin/events/{} request was received. Patch event by id", eventId);
+
+        return eventService.patchEventById(eventId, updateEventAdminDto);
     }
 
     @GetMapping("/users")

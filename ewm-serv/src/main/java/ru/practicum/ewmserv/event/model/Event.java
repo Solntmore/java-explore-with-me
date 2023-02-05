@@ -1,6 +1,9 @@
 package ru.practicum.ewmserv.event.model;
 
 import lombok.*;
+import ru.practicum.ewmserv.enums.StateAction;
+import ru.practicum.ewmserv.category.model.Category;
+import ru.practicum.ewmserv.user.model.User;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
@@ -23,15 +26,23 @@ public class Event {
     @Size(min = 20, max = 2000)
     private String annotation;
 
-    @Column(name = "category_id")
-    private int category;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    @Column(name = "created_on")
+    private LocalDateTime createdOn;
 
     @Column(name = "description", length = 7000, nullable = false)
     @Size(min = 20, max = 7000)
     private String description;
 
-    @Column(name = "eventDate", nullable = false)
+    @Column(name = "event_date", nullable = false)
     private LocalDateTime eventDate;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User initiator;
 
     @Embedded
     private Location location;
@@ -39,11 +50,18 @@ public class Event {
     @Column(name = "paid")
     private boolean paid = false;
 
-    @Column(name = "participantLimit")
+    @Column(name = "participant_limit")
     private int participantLimit = 5000000;
 
-    @Column(name = "requestModeration")
+    @Column(name = "published_on")
+    private LocalDateTime publishedOn;
+
+    @Column(name = "request_moderation")
     private boolean requestModeration = true;
+
+    @Column(columnDefinition = "varchar(512) default 'PENDING'")
+    @Enumerated(EnumType.STRING)
+    private StateAction stateAction;
 
     @Column(name = "title", length = 120, nullable = false)
     @Size(min = 3, max = 120)

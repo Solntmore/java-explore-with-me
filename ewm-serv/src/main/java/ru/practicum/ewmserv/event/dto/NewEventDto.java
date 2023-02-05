@@ -16,7 +16,7 @@ public class NewEventDto implements Serializable {
     @Size(min = 20, max = 2000)
     private final String annotation;
 
-    private final int category;
+    private final Long categoryId;
 
     @Size(min = 20, max = 7000)
     private final String description;
@@ -30,7 +30,7 @@ public class NewEventDto implements Serializable {
     private final int participantLimit;
 
     private final boolean requestModeration;
-
+    
     @Size(min = 3, max = 120)
     private final String title;
 }
