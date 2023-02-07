@@ -3,7 +3,6 @@ package ru.practicum.ewmserv.category.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import ru.practicum.HitClient;
 import ru.practicum.RequestHitDto;
 import ru.practicum.StatsClient;
 import ru.practicum.ewmserv.category.dto.RequestCategoryDto;
@@ -30,7 +29,6 @@ public class CategoryService {
 
     private final StatsClient statsClient;
 
-    private final HitClient hitClient;
 
 
     public ResponseCategoryDto postCategory(RequestCategoryDto requestCategoryDto) {
@@ -79,6 +77,6 @@ public class CategoryService {
     private void addHit(HttpServletRequest request) {
         RequestHitDto requestHitDto = new RequestHitDto("ewm-serv", request.getRequestURI(), request.getRemoteUser());
         requestHitDto.setTimestamp(String.valueOf(LocalDateTime.now()));
-        hitClient.saveRequest(requestHitDto);
+        statsClient.saveRequest(requestHitDto);
     }
 }

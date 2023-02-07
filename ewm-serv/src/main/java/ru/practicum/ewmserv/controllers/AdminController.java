@@ -25,6 +25,7 @@ import java.util.ArrayList;
 @RequiredArgsConstructor
 @RequestMapping(path = "/admin")
 public class AdminController {
+
     private final EventRepository eventRepository;
 
     private final UserService userService;

@@ -3,7 +3,6 @@ package ru.practicum.ewmserv.event.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import ru.practicum.HitClient;
 import ru.practicum.RequestHitDto;
 import ru.practicum.StatsClient;
 import ru.practicum.ViewStats;
@@ -22,6 +21,7 @@ import ru.practicum.ewmserv.user.repository.UserRepository;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -36,9 +36,9 @@ public class EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final StatsClient statsClient;
-    private final HitClient hitClient;
     private final RequestRepository requestRepository;
 
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public EventFullDto postEvent(long userId, NewEventDto newEventDto) {
         User user = userRepository.findById(userId).orElseThrow(() ->
@@ -167,10 +167,58 @@ public class EventService {
     private void addHit(HttpServletRequest request) {
         RequestHitDto requestHitDto = new RequestHitDto("ewm-serv", request.getRequestURI(), request.getRemoteUser());
         requestHitDto.setTimestamp(LocalDateTime.now().format(DATE_TIME_FORMATTER));
-        hitClient.saveRequest(requestHitDto);
+        statsClient.saveRequest(requestHitDto);
     }
 
     private ArrayList<ViewStats> getStatsList(String start, String end, Collection<String> uris, boolean flag) {
         return statsClient.getStats(start, end, uris, flag);
     }
-}
+/*
+    public void getEventsWithParameters(String text, List<Long> categories, Boolean paid, String rangeStart,
+                                        String rangeEnd, Boolean onlyAvailable, String sort, PageRequest of) {
+        boolean allUsers = true;
+        boolean allStates = true;
+        boolean allCategories = true;
+        boolean allText = true;
+        LocalDateTime start;
+        LocalDateTime end;
+
+        if (text != null) {
+            allText = false;
+        }
+
+        if (!categories.isEmpty()) {
+            allCategories = false;
+        }
+
+        if (rangeStart == null) {
+            start = LocalDateTime.now();
+            end = start.plusYears(100);
+        } else {
+            start = LocalDateTime.parse(rangeStart, formatter);
+            end = LocalDateTime.parse(rangeEnd, formatter);
+        }
+
+        if (sort == null) {
+            sort = "EVENT_DATE";
+        }
+
+
+        eventRepository.getEventWithParametersForAdmin(allUsers, users, );
+        /*
+        @Query("SELECT e from Event as e " +
+            "join fetch e.initiator " +
+            "join fetch e.category " +
+            "where " +
+            "((:allUsers = true) or e.initiator.id in (:users)) and " +
+            "((:allStates = true) or e.stateAction in (:states)) and " +
+            "((:allCategories = true) or e.category.id in (:categories)) and " +
+            "((e.eventDate between :rangeStart and :rangeEnd))")
+    Page<Event> getEventWithParameters(boolean allUsers, Collection<Long> users,
+                                       boolean allStates, Collection<StateAction> states,
+                                       boolean allCategories, Collection<Long> categories,
+                                       LocalDateTime rangeStart, LocalDateTime rangeEnd,
+                                       Pageable pageable);
+         */
+    }
+
