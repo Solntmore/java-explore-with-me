@@ -18,6 +18,7 @@ import ru.practicum.ewmserv.request.model.Request;
 import ru.practicum.ewmserv.request.repository.RequestRepository;
 import ru.practicum.ewmserv.user.exceptions.NotAllowTakeRequestException;
 import ru.practicum.ewmserv.user.exceptions.UserNotFoundException;
+import ru.practicum.ewmserv.user.model.ResultOfUpdateRequests;
 import ru.practicum.ewmserv.user.model.UpdateListForRequests;
 import ru.practicum.ewmserv.user.model.User;
 import ru.practicum.ewmserv.user.repository.UserRepository;
@@ -120,8 +121,8 @@ public class RequestServise {
     }
 
     @Transactional
-    public ArrayList<ResponseRequestDto> updateStatusOfRequests(long userId, long eventId,
-                                                                UpdateListForRequests updateListForRequests) {
+    public ResultOfUpdateRequests updateStatusOfRequests(long userId, long eventId,
+                                                         UpdateListForRequests updateListForRequests) {
         if (!userRepository.existsById(userId)) {
             throw new UserNotFoundException("User with id=" + userId + " was not found");
         }
@@ -131,7 +132,9 @@ public class RequestServise {
 
         ArrayList<Long> ids = updateListForRequests.getRequestIds();
         RequestUpdateState state = updateListForRequests.getStatus();
-        ArrayList<Request> updateRequests = new ArrayList<>();
+        ArrayList<Request> confirmedRequests = new ArrayList<>();
+        ArrayList<Request> rejectedRequests = new ArrayList<>();
+
         for (Long id : ids) {
             if (event.getParticipantLimit() == 0) {
                 throw new NotAllowTakeRequestException("Sorry, but the limit of participants is exhausted");
@@ -146,16 +149,28 @@ public class RequestServise {
 
             if (state.equals(RequestUpdateState.CONFIRMED)) {
                 request.setStatus(RequestStatus.CONFIRMED);
-                updateRequests.add(requestRepository.save(request));
+                confirmedRequests.add(requestRepository.save(request));
                 event.setParticipantLimit(event.getParticipantLimit() - 1);
             } else {
                 request.setStatus(RequestStatus.REJECTED);
-                updateRequests.add(requestRepository.save(request));
+                rejectedRequests.add(requestRepository.save(request));
             }
         }
         eventRepository.save(event);
 
-        return (ArrayList<ResponseRequestDto>) updateRequests.stream().map(requestMapper::toDto)
+        return makeResult(confirmedRequests, rejectedRequests);
+    }
+
+    private ResultOfUpdateRequests makeResult(ArrayList<Request> confirmedRequests,
+                                              ArrayList<Request> rejectedRequests) {
+
+        ArrayList<ResponseRequestDto> confirmed = (ArrayList<ResponseRequestDto>) confirmedRequests.stream()
+                .map(requestMapper::toDto)
                 .collect(Collectors.toList());
+        ArrayList<ResponseRequestDto> rejected = (ArrayList<ResponseRequestDto>) rejectedRequests.stream()
+                .map(requestMapper::toDto)
+                .collect(Collectors.toList());
+
+        return new ResultOfUpdateRequests(confirmed, rejected);
     }
 }

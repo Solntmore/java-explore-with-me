@@ -1,4 +1,4 @@
-package ru.practicum.ewmserv.controllers;
+package ru.practicum.ewmserv.admin;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewmserv.category.dto.RequestCategoryDto;
 import ru.practicum.ewmserv.category.dto.ResponseCategoryDto;
 import ru.practicum.ewmserv.category.service.CategoryService;
+import ru.practicum.ewmserv.enums.StateAction;
 import ru.practicum.ewmserv.event.dto.EventFullDto;
 import ru.practicum.ewmserv.event.dto.UpdateEventAdminDto;
-import ru.practicum.ewmserv.event.repository.EventRepository;
 import ru.practicum.ewmserv.event.service.EventService;
 import ru.practicum.ewmserv.user.dto.RequestUserDto;
 import ru.practicum.ewmserv.user.dto.ResponseUserDto;
@@ -19,14 +19,13 @@ import ru.practicum.ewmserv.user.service.UserService;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/admin")
 public class AdminController {
-
-    private final EventRepository eventRepository;
 
     private final UserService userService;
     private final CategoryService categoryService;
@@ -56,8 +55,17 @@ public class AdminController {
     }
 
     @GetMapping("/events")
-    public void getEvents() {
+    public ResponseEntity<ArrayList<EventFullDto>> getEvents(@RequestParam(required = false) List<Long> users,
+                                                             @RequestParam(required = false) List<StateAction> states,
+                                                             @RequestParam(required = false) List<Long> categories,
+                                                             @RequestParam(required = false) String rangeStart,
+                                                             @RequestParam(required = false) String rangeEnd,
+                                                             @RequestParam(required = false, defaultValue = "0") int from,
+                                                             @RequestParam(required = false, defaultValue = "10") int size) {
         log.debug("A Get/admin/events request was received. Get events");
+
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsForAdmin(users, states, categories,
+                rangeStart, rangeEnd, from, size));
     }
 
     @PatchMapping("/events/{eventId}")

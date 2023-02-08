@@ -14,6 +14,7 @@ import ru.practicum.ewmserv.event.repository.EventRepository;
 import ru.practicum.ewmserv.event.service.EventService;
 import ru.practicum.ewmserv.request.dto.ResponseRequestDto;
 import ru.practicum.ewmserv.request.service.RequestServise;
+import ru.practicum.ewmserv.user.model.ResultOfUpdateRequests;
 import ru.practicum.ewmserv.user.model.UpdateListForRequests;
 
 import java.util.ArrayList;
@@ -76,7 +77,7 @@ public class UsersController {
     }
 
     @PatchMapping("/{userId}/events/{eventId}/requests")
-    public ResponseEntity<ArrayList<ResponseRequestDto>>
+    public ResponseEntity<ResultOfUpdateRequests>
     ChangeStatusOfRequestByUserAndEventId(@PathVariable long userId, @PathVariable long eventId,
                                           @RequestBody UpdateListForRequests updateListForRequests) {
         log.debug("A Patch/users/{}/events/{}/requests request was received. Change status for requests to event " +

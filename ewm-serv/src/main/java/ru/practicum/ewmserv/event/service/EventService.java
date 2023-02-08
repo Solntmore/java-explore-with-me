@@ -1,5 +1,7 @@
 package ru.practicum.ewmserv.event.service;
 
+import com.querydsl.core.BooleanBuilder;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -13,7 +15,10 @@ import ru.practicum.ewmserv.event.exceptions.EventNotFoundException;
 import ru.practicum.ewmserv.event.exceptions.NotAllowToEditEventException;
 import ru.practicum.ewmserv.event.mapper.EventMapper;
 import ru.practicum.ewmserv.event.model.Event;
+import ru.practicum.ewmserv.event.model.QEvent;
 import ru.practicum.ewmserv.event.repository.EventRepository;
+import ru.practicum.ewmserv.event.util.EventFilterForAdmin;
+import ru.practicum.ewmserv.event.util.EventFilterForUser;
 import ru.practicum.ewmserv.request.repository.RequestRepository;
 import ru.practicum.ewmserv.user.exceptions.UserNotFoundException;
 import ru.practicum.ewmserv.user.model.User;
@@ -24,6 +29,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -130,6 +136,42 @@ public class EventService {
         return setViewsAndConfirmedRequests(eventFullDto, eventId);
     }
 
+    public ArrayList<EventShortDto> getEventsForUser(String text, List<Long> categories, Boolean paid, String rangeStart,
+                                                     String rangeEnd, Boolean onlyAvailable, String sort, int from,
+                                                     int size, HttpServletRequest request) {
+        addHit(request);
+        EventFilterForUser filter = makeUserFilter(text, categories, paid, rangeStart, rangeEnd, onlyAvailable);
+        BooleanBuilder parameters = makeBooleanBuilder(filter);
+        List<Event> events = eventRepository.findAll(parameters, PageRequest.of(from, size)).getContent();
+        ArrayList<EventShortDto> fullEvents = (ArrayList<EventShortDto>) events.stream()
+                .map(eventMapper::toEventShortDto)
+                .map(eventShortDto -> setViewsAndConfirmedRequests(eventShortDto))
+                .collect(Collectors.toList());
+
+        if (sort != null && sort.equals("EVENT_DATE")) {
+            fullEvents.sort(Comparator.comparing(EventShortDto::getEventDate));
+            return fullEvents;
+        }
+
+        if (sort != null && sort.equals("VIEWS")) {
+            fullEvents.sort(Comparator.comparing(EventShortDto::getEventDate));
+            return fullEvents;
+        }
+        return fullEvents;
+    }
+
+    public ArrayList<EventFullDto> getEventsForAdmin(List<Long> users, List<StateAction> states, List<Long> categories,
+                                                     String rangeStart, String rangeEnd, int from, int size) {
+        EventFilterForAdmin filter = makeAdminFilter(users, states, categories, rangeStart, rangeEnd);
+        BooleanBuilder parameters = makeBooleanBuilder(filter);
+        List<Event> events = eventRepository.findAll(parameters, PageRequest.of(from, size)).getContent();
+
+        return (ArrayList<EventFullDto>) events.stream()
+                .map(eventMapper::toEventFullDto)
+                .map(eventFullDto -> setViewsAndConfirmedRequests(eventFullDto, eventFullDto.getId()))
+                .collect(Collectors.toList());
+    }
+
     private EventFullDto setViewsAndConfirmedRequests(EventFullDto eventFullDto, long eventId) {
         String uri = "/events/" + eventId;
         String start = eventFullDto.getCreatedOn().format(DATE_TIME_FORMATTER);
@@ -173,23 +215,11 @@ public class EventService {
     private ArrayList<ViewStats> getStatsList(String start, String end, Collection<String> uris, boolean flag) {
         return statsClient.getStats(start, end, uris, flag);
     }
-/*
-    public void getEventsWithParameters(String text, List<Long> categories, Boolean paid, String rangeStart,
-                                        String rangeEnd, Boolean onlyAvailable, String sort, PageRequest of) {
-        boolean allUsers = true;
-        boolean allStates = true;
-        boolean allCategories = true;
-        boolean allText = true;
+
+    private EventFilterForUser makeUserFilter(String text, List<Long> categories, Boolean paid, String rangeStart,
+                                              String rangeEnd, Boolean onlyAvailable) {
         LocalDateTime start;
         LocalDateTime end;
-
-        if (text != null) {
-            allText = false;
-        }
-
-        if (!categories.isEmpty()) {
-            allCategories = false;
-        }
 
         if (rangeStart == null) {
             start = LocalDateTime.now();
@@ -199,26 +229,67 @@ public class EventService {
             end = LocalDateTime.parse(rangeEnd, formatter);
         }
 
-        if (sort == null) {
-            sort = "EVENT_DATE";
+        return EventFilterForUser.builder().text(text).categories(categories)
+                .paid(paid).rangeStart(start).rangeEnd(end).onlyAvailable(onlyAvailable).build();
+    }
+
+    private EventFilterForAdmin makeAdminFilter(List<Long> users, List<StateAction> states, List<Long> categories,
+                                                String rangeStart, String rangeEnd) {
+        LocalDateTime start;
+        LocalDateTime end;
+
+        if (rangeStart == null) {
+            start = LocalDateTime.now();
+            end = start.plusYears(100);
+        } else {
+            start = LocalDateTime.parse(rangeStart, formatter);
+            end = LocalDateTime.parse(rangeEnd, formatter);
         }
 
-
-        eventRepository.getEventWithParametersForAdmin(allUsers, users, );
-        /*
-        @Query("SELECT e from Event as e " +
-            "join fetch e.initiator " +
-            "join fetch e.category " +
-            "where " +
-            "((:allUsers = true) or e.initiator.id in (:users)) and " +
-            "((:allStates = true) or e.stateAction in (:states)) and " +
-            "((:allCategories = true) or e.category.id in (:categories)) and " +
-            "((e.eventDate between :rangeStart and :rangeEnd))")
-    Page<Event> getEventWithParameters(boolean allUsers, Collection<Long> users,
-                                       boolean allStates, Collection<StateAction> states,
-                                       boolean allCategories, Collection<Long> categories,
-                                       LocalDateTime rangeStart, LocalDateTime rangeEnd,
-                                       Pageable pageable);
-         */
+        return EventFilterForAdmin.builder().users(users).states(states).categories(categories)
+                .rangeStart(start).rangeEnd(end).build();
     }
+
+    @NonNull
+    private BooleanBuilder makeBooleanBuilder(@NonNull EventFilterForUser filter) {
+        BooleanBuilder builder = new BooleanBuilder();
+        if (filter.getText() != null) {
+            builder.and(QEvent.event.annotation.likeIgnoreCase(filter.getText())
+                    .or(QEvent.event.description.likeIgnoreCase(filter.getText())));
+        }
+        if (filter.getCategories() != null && !filter.getCategories().isEmpty()) {
+            builder.and(QEvent.event.category.id.in(filter.getCategories()));
+        }
+        if (filter.getPaid() != null) {
+            builder.and(QEvent.event.paid.eq(filter.getPaid()));
+        }
+        if (filter.getOnlyAvailable() != null) {
+            builder.and(QEvent.event.participantLimit.goe(0));
+        }
+
+        builder.and(QEvent.event.eventDate.after(filter.getRangeStart()));
+        builder.and(QEvent.event.eventDate.before(filter.getRangeEnd()));
+        return builder;
+    }
+
+    @NonNull
+    private BooleanBuilder makeBooleanBuilder(@NonNull EventFilterForAdmin filter) {
+        BooleanBuilder builder = new BooleanBuilder();
+
+        if (filter.getUsers() != null && !filter.getUsers().isEmpty()) {
+            builder.and(QEvent.event.initiator.id.in(filter.getUsers()));
+        }
+        if (filter.getStates() != null && !filter.getStates().isEmpty()) {
+            builder.and(QEvent.event.stateAction.in(filter.getStates()));
+        }
+        if (filter.getCategories() != null && !filter.getCategories().isEmpty()) {
+            builder.and(QEvent.event.category.id.in(filter.getCategories()));
+        }
+
+        builder.and(QEvent.event.eventDate.after(filter.getRangeStart()));
+        builder.and(QEvent.event.eventDate.before(filter.getRangeEnd()));
+        return builder;
+    }
+}
+
 
