@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewmserv.category.dto.RequestCategoryDto;
 import ru.practicum.ewmserv.category.dto.ResponseCategoryDto;
 import ru.practicum.ewmserv.category.service.CategoryService;
+import ru.practicum.ewmserv.compilation.dto.RequestCompilationDto;
+import ru.practicum.ewmserv.compilation.dto.ResponseCompilationDto;
+import ru.practicum.ewmserv.compilation.service.CompilationsService;
 import ru.practicum.ewmserv.enums.StateAction;
 import ru.practicum.ewmserv.event.dto.EventFullDto;
 import ru.practicum.ewmserv.event.dto.UpdateEventAdminDto;
@@ -30,6 +33,8 @@ public class AdminController {
     private final UserService userService;
     private final CategoryService categoryService;
     private final EventService eventService;
+
+    private final CompilationsService compilationsService;
 
     @PostMapping("/categories")
     public ResponseEntity<ResponseCategoryDto> postCategory(@RequestBody @Valid RequestCategoryDto requestCategoryDto) {
@@ -101,19 +106,32 @@ public class AdminController {
     }
 
     @PostMapping("/compilations")
-    public void postCompilations() {
+    public ResponseEntity<ResponseCompilationDto> postCompilations(
+            @RequestBody RequestCompilationDto requestCompilationDto) {
         log.debug("A Post/admin/compilations request was received. Post compilations");
+
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(compilationsService.postCompilation(requestCompilationDto));
+
     }
 
     @DeleteMapping("/compilations/{compId}")
-    public void postCompilations(@PathVariable long compId) {
+    public ResponseEntity<Void> postCompilations(@PathVariable long compId) {
         log.debug("A Delete/admin/compilations/{} request was received. Post compilations", compId);
+        compilationsService.deleteCompilation(compId);
+
+        return ResponseEntity.status(204).build();
     }
 
     @PatchMapping("/compilations/{compId}")
-    public void patchCompilations(@PathVariable long compId) {
+    public ResponseEntity<ResponseCompilationDto> patchCompilations(
+            @PathVariable long compId, @RequestBody RequestCompilationDto requestCompilationDto) {
         log.debug("A Patch/admin/compilations/{} request was received. Patch compilations", compId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                compilationsService.patchCompilation(compId, requestCompilationDto));
+
+
     }
-
-
 }
+

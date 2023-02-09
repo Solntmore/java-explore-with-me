@@ -5,6 +5,7 @@ import ru.practicum.ewmserv.event.model.Event;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -13,16 +14,15 @@ import java.util.ArrayList;
 @NoArgsConstructor
 @Entity
 @Table(name = "events")
-public class Compilations {
+public class Compilation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany
+    @ManyToMany
     @JoinColumn(name = "event_id")
-    @ToString.Exclude
-    private ArrayList<Event> eventList;
+    private List<Event> eventList;
 
     @Column(name = "pinned")
     private boolean pinned;

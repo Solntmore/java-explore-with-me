@@ -32,7 +32,7 @@ public class StatsClient {
     }
 
     public void saveRequest(RequestHitDto requestHitDto) {
-        String statsResourceUrl = mainUrl + "/gits";
+        String statsResourceUrl = mainUrl + "/hits";
         HttpEntity<RequestHitDto> request = new HttpEntity<>(requestHitDto);
         restTemplate.postForObject(statsResourceUrl, request, RequestHitDto.class);
     }

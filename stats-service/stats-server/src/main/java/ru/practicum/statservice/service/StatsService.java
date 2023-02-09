@@ -23,11 +23,11 @@ public class StatsService {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 
-    public void saveRequest(RequestHitDto requestHitDto) {
+    public Hit saveRequest(RequestHitDto requestHitDto) {
         Hit hit = hitMapper.toHitEntity(requestHitDto);
         LocalDateTime created = LocalDateTime.parse(requestHitDto.getTimestamp(), formatter);
         hit.setCreated(created);
-        hitRepository.save(hit);
+        return hitRepository.save(hit);
     }
 
     public ArrayList<ViewStats> getStats(LocalDateTime start, LocalDateTime end, boolean unique,

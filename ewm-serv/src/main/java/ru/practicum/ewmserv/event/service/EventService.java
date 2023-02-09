@@ -207,7 +207,7 @@ public class EventService {
     }
 
     private void addHit(HttpServletRequest request) {
-        RequestHitDto requestHitDto = new RequestHitDto("ewm-serv", request.getRequestURI(), request.getRemoteUser());
+        RequestHitDto requestHitDto = new RequestHitDto("ewm-serv", request.getRequestURI(), request.getRemoteAddr());
         requestHitDto.setTimestamp(LocalDateTime.now().format(DATE_TIME_FORMATTER));
         statsClient.saveRequest(requestHitDto);
     }

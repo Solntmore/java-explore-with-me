@@ -14,6 +14,7 @@ import ru.practicum.ewmserv.category.repository.CategoryRepository;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,7 @@ public class CategoryService {
     private final CategoryMapper categoryMapper;
 
     private final StatsClient statsClient;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 
 
@@ -75,8 +77,8 @@ public class CategoryService {
     }
 
     private void addHit(HttpServletRequest request) {
-        RequestHitDto requestHitDto = new RequestHitDto("ewm-serv", request.getRequestURI(), request.getRemoteUser());
-        requestHitDto.setTimestamp(String.valueOf(LocalDateTime.now()));
+        RequestHitDto requestHitDto = new RequestHitDto("ewm-serv", request.getRequestURI(), request.getRemoteAddr());
+        requestHitDto.setTimestamp(LocalDateTime.now().format(formatter));
         statsClient.saveRequest(requestHitDto);
     }
 }

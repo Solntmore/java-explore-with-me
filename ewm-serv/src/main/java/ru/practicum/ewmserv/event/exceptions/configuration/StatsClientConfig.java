@@ -1,4 +1,4 @@
-package ru.practicum.ewmserv.configuration;
+package ru.practicum.ewmserv.event.exceptions.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

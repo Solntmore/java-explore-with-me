@@ -1,16 +1,16 @@
 package ru.practicum.ewmserv.compilation.dto;
 
 import lombok.Data;
-import ru.practicum.ewmserv.event.model.Event;
+import ru.practicum.ewmserv.compilation.model.Compilation;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
- * A DTO for the {@link ru.practicum.ewmserv.compilation.model.Compilations} entity
+ * A DTO for the {@link Compilation} entity
  */
 @Data
-public class RequestCompilationsDto implements Serializable {
+public class RequestCompilationDto implements Serializable {
 
     private ArrayList<Long> events;
 

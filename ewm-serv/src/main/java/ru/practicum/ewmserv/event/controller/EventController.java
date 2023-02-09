@@ -31,10 +31,10 @@ public class EventController {
     @GetMapping
     public ResponseEntity<ArrayList<EventShortDto>> getEvents(@RequestParam(required = false) String text,
                                                               @RequestParam(required = false) List<Long> categories,
-                                                              @RequestParam(required = false) boolean paid,
+                                                              @RequestParam(required = false) Boolean paid,
                                                               @RequestParam(required = false) String rangeStart,
                                                               @RequestParam(required = false) String rangeEnd,
-                                                              @RequestParam(required = false) boolean onlyAvailable,
+                                                              @RequestParam(required = false) Boolean onlyAvailable,
                                                               @RequestParam(required = false) String sort,
                                                               @RequestParam(required = false, defaultValue = "0") int from,
                                                               @RequestParam(required = false, defaultValue = "10") int size,

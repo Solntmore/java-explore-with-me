@@ -2,10 +2,13 @@ package ru.practicum.ewmserv.compilation.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.ewmserv.compilation.dto.ResponseCompilationDto;
+import ru.practicum.ewmserv.compilation.service.CompilationsService;
+
+import java.util.ArrayList;
 
 @Slf4j
 @RestController
@@ -13,13 +16,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/compilations")
 public class CompilationsController {
 
+    private final CompilationsService compilationsService;
+
     @GetMapping
-    public void getCompilations() {
+    public ResponseEntity<ArrayList<ResponseCompilationDto>> getCompilations(@RequestParam Boolean pinned, @RequestParam(required = false, defaultValue = "0") int from,
+                                                                             @RequestParam(required = false, defaultValue = "10") int size) {
         log.debug("A Get/compilations request was received. Get compilations");
+
+        return ResponseEntity.status(HttpStatus.OK).body(compilationsService.getCompilations(pinned, from, size));
     }
 
     @GetMapping("{compId}")
-    public void getCompilationById(@PathVariable long catId) {
-        log.debug("A Get/compilations/{compId} request was received. Get compilation by id", catId);
+    public ResponseEntity<ResponseCompilationDto> getCompilationById(@PathVariable long compId) {
+        log.debug("A Get/compilations/{} request was received. Get compilation by id", compId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(compilationsService.getCompilationById(compId));
     }
 }
