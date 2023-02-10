@@ -41,7 +41,7 @@ public class UsersController {
     }
 
     @PostMapping("/{userId}/events")
-    public ResponseEntity<EventFullDto> postEvent(@PathVariable long userId, @RequestParam NewEventDto newEventDto) {
+    public ResponseEntity<EventFullDto> postEvent(@PathVariable long userId, @RequestBody NewEventDto newEventDto) {
         log.debug("A Post/users/{}/events request was received. Post event by current user", userId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.postEvent(userId, newEventDto));

@@ -3,6 +3,7 @@ package ru.practicum.statservice.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.RequestHitDto;
+import ru.practicum.ResponseHitDto;
 import ru.practicum.ViewStats;
 import ru.practicum.statservice.mappers.HitMapper;
 import ru.practicum.statservice.model.Hit;
@@ -23,11 +24,11 @@ public class StatsService {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 
-    public Hit saveRequest(RequestHitDto requestHitDto) {
+    public ResponseHitDto saveRequest(RequestHitDto requestHitDto) {
         Hit hit = hitMapper.toHitEntity(requestHitDto);
         LocalDateTime created = LocalDateTime.parse(requestHitDto.getTimestamp(), formatter);
         hit.setCreated(created);
-        return hitRepository.save(hit);
+        return hitMapper.toDto(hitRepository.save(hit));
     }
 
     public ArrayList<ViewStats> getStats(LocalDateTime start, LocalDateTime end, boolean unique,

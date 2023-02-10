@@ -10,11 +10,12 @@ import ru.practicum.ewmserv.user.mapper.UserMapper;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = "spring", uses = {LocationMapper.class, CategoryMapper.class, UserMapper.class})
 public interface EventMapper {
-    @Mapping(source = "categoryId", target = "category.id")
+
+    @Mapping(target = "category", ignore = true)
     Event toEntityFromNewEventDto(NewEventDto newEventDto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(source = "categoryId", target = "category.id")
+    @Mapping(source = "category", target = "category.id")
     Event partialUpdate(NewEventDto newEventDto, @MappingTarget Event event);
 
     @Mapping(source = "stateAction", target = "state")

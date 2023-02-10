@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import ru.practicum.RequestHitDto;
-import ru.practicum.statservice.model.Hit;
+import ru.practicum.ResponseHitDto;
 import ru.practicum.statservice.service.StatsService;
 
 @Slf4j
@@ -22,7 +22,7 @@ public class HitController {
     private final StatsService statsService;
 
     @PostMapping
-    public ResponseEntity<Hit> saveRequest(@RequestBody RequestHitDto requestHitDto) {
+    public ResponseEntity<ResponseHitDto> saveRequest(@RequestBody RequestHitDto requestHitDto) {
         log.debug("A Post/stats request was received. Save info about request: {}", requestHitDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(statsService.saveRequest(requestHitDto));

@@ -29,7 +29,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.ewmserv.constants.Constants.DATE_TIME_FORMATTER;
+import static ru.practicum.ewmserv.configuration.AppConfig.DATE_TIME_FORMATTER;
+
 
 @RequiredArgsConstructor
 @Service
@@ -130,11 +131,18 @@ public class CompilationsService {
     }
 
     private Compilation setEvents(Compilation compilation, RequestCompilationDto requestCompilationDto) {
+        ArrayList<Event> events = new ArrayList<>();
+
+        if (requestCompilationDto.getEvents().isEmpty()) {
+            compilation.setEventList(events);
+            return compilation;
+        }
+
         EventFilterForCompilations filter = EventFilterForCompilations.builder()
                 .ids(requestCompilationDto.getEvents()).build();
 
         BooleanBuilder parameters = makeBooleanBuilder(filter);
-        ArrayList<Event> events = (ArrayList<Event>) eventRepository
+        events = (ArrayList<Event>) eventRepository
                 .findAll(parameters, PageRequest.of(0, 100)).getContent();
 
         compilation.setEventList(events);

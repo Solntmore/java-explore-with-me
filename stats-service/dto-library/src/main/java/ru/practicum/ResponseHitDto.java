@@ -4,14 +4,20 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
 
-import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Data
 @Jacksonized
 @Builder
-public class RequestHitDto implements Serializable {
+public class ResponseHitDto {
+
+    private final Long id;
+
     private final String app;
+
     private final String uri;
+
     private final String ip;
-    private String timestamp;
+
+    private final LocalDateTime created;
 }

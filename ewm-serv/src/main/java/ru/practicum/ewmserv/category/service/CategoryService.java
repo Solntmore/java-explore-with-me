@@ -32,7 +32,6 @@ public class CategoryService {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 
-
     public ResponseCategoryDto postCategory(RequestCategoryDto requestCategoryDto) {
         Category category = categoryRepository.save(
                 categoryMapper.toEntity(requestCategoryDto));
@@ -77,8 +76,9 @@ public class CategoryService {
     }
 
     private void addHit(HttpServletRequest request) {
-        RequestHitDto requestHitDto = new RequestHitDto("ewm-serv", request.getRequestURI(), request.getRemoteAddr());
-        requestHitDto.setTimestamp(LocalDateTime.now().format(formatter));
+        RequestHitDto requestHitDto = RequestHitDto.builder().app("ewm-serv").uri(request.getRequestURI())
+                .ip(request.getRemoteAddr()).timestamp(LocalDateTime.now().format(formatter)).build();
         statsClient.saveRequest(requestHitDto);
+
     }
 }

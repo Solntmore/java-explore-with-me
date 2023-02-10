@@ -14,7 +14,8 @@ import java.util.List;
 public class StatsClient {
 
     private final RestTemplate restTemplate;
-    private final String mainUrl = "${stats-service.url}";
+
+    private final String mainUrl;
 
 /*
 {{baseUrl}}/stats?start=2020-05-05 00:00:00&end=2035-05-05 00:00:00&uris={{uri}}&unique=false
@@ -32,8 +33,9 @@ public class StatsClient {
     }
 
     public void saveRequest(RequestHitDto requestHitDto) {
-        String statsResourceUrl = mainUrl + "/hits";
+        String statsResourceUrl = mainUrl + "/hit";
         HttpEntity<RequestHitDto> request = new HttpEntity<>(requestHitDto);
-        restTemplate.postForObject(statsResourceUrl, request, RequestHitDto.class);
+         /*restTemplate.postForObject(statsResourceUrl, request, RequestHitDto.class);*/
+         restTemplate.postForEntity(statsResourceUrl, request, RequestHitDto.class);
     }
 }

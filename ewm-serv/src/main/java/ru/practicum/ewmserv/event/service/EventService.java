@@ -5,9 +5,13 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.RequestHitDto;
 import ru.practicum.StatsClient;
 import ru.practicum.ViewStats;
+import ru.practicum.ewmserv.category.exceptions.CategoryNotFoundException;
+import ru.practicum.ewmserv.category.model.Category;
+import ru.practicum.ewmserv.category.repository.CategoryRepository;
 import ru.practicum.ewmserv.enums.RequestStatus;
 import ru.practicum.ewmserv.enums.StateAction;
 import ru.practicum.ewmserv.event.dto.*;
@@ -33,7 +37,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.ewmserv.constants.Constants.DATE_TIME_FORMATTER;
+import static ru.practicum.ewmserv.configuration.AppConfig.DATE_TIME_FORMATTER;
 
 @RequiredArgsConstructor
 @Service
@@ -41,18 +45,24 @@ public class EventService {
     private final EventMapper eventMapper;
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
-    private final StatsClient statsClient;
     private final RequestRepository requestRepository;
+    private final CategoryRepository categoryRepository;
+    private final StatsClient statsClient;
+
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    @Transactional
     public EventFullDto postEvent(long userId, NewEventDto newEventDto) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new UserNotFoundException("User with id=" + userId + " was not found"));
+        Category category = categoryRepository.findById(newEventDto.getCategory()).orElseThrow(() ->
+                new CategoryNotFoundException("Category was not found"));
         LocalDateTime start = LocalDateTime.now();
         Event event = eventMapper.toEntityFromNewEventDto(newEventDto);
         event.setInitiator(user);
         event.setCreatedOn(start);
+        event.setCategory(category);
 
         EventFullDto saveEvent = eventMapper.toEventFullDto(eventRepository.save(event));
         saveEvent.setViews(0L);
@@ -207,8 +217,8 @@ public class EventService {
     }
 
     private void addHit(HttpServletRequest request) {
-        RequestHitDto requestHitDto = new RequestHitDto("ewm-serv", request.getRequestURI(), request.getRemoteAddr());
-        requestHitDto.setTimestamp(LocalDateTime.now().format(DATE_TIME_FORMATTER));
+        RequestHitDto requestHitDto = RequestHitDto.builder().app("ewm-serv").uri(request.getRequestURI())
+                .ip(request.getRemoteAddr()).timestamp(LocalDateTime.now().format(DATE_TIME_FORMATTER)).build();
         statsClient.saveRequest(requestHitDto);
     }
 

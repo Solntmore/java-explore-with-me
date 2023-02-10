@@ -3,6 +3,7 @@ package ru.practicum.statservice.mappers;
 import org.mapstruct.*;
 import ru.practicum.IViewStats;
 import ru.practicum.RequestHitDto;
+import ru.practicum.ResponseHitDto;
 import ru.practicum.ViewStats;
 import ru.practicum.statservice.model.Hit;
 
@@ -10,7 +11,7 @@ import ru.practicum.statservice.model.Hit;
 public interface HitMapper {
     Hit toHitEntity(RequestHitDto requestHitDto);
 
-    RequestHitDto toDto(Hit hit);
+    ResponseHitDto toDto(Hit hit);
 
     ViewStats toViewStatsEntity(IViewStats iViewStats);
 
