@@ -4,7 +4,8 @@ import org.springframework.context.annotation.Lazy;
 import ru.practicum.ewmserv.compilation.model.Compilation;
 import ru.practicum.ewmserv.event.model.Event;
 
-import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class CompilationRepositoryImpl implements CompilationRepositoryCustom {
     private final CompilationRepository compilationRepository;
@@ -15,12 +16,12 @@ public class CompilationRepositoryImpl implements CompilationRepositoryCustom {
 
     @Override
     public Compilation patchCompilationByAdmin(Compilation oldCompilation, Compilation newCompilation) {
-        ArrayList<Event> eventList = (ArrayList<Event>) newCompilation.getEventList();
+        Optional<List<Event>> list = Optional.ofNullable(newCompilation.getEventList());
         boolean pinned = newCompilation.isPinned();
         String title = newCompilation.getTitle();
 
-        if (!oldCompilation.getEventList().equals(eventList)) {
-            oldCompilation.setEventList(eventList);
+        if (list.isPresent()) {
+            oldCompilation.setEventList(newCompilation.getEventList());
         }
 
         if (oldCompilation.isPinned() != pinned) {

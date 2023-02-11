@@ -1,17 +1,14 @@
 package ru.practicum.ewmserv.event.model;
 
 import lombok.*;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
+import ru.practicum.ewmserv.category.model.Category;
 import ru.practicum.ewmserv.compilation.model.Compilation;
 import ru.practicum.ewmserv.enums.StateAction;
-import ru.practicum.ewmserv.category.model.Category;
 import ru.practicum.ewmserv.user.model.User;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -64,20 +61,16 @@ public class Event {
     @Column(name = "request_moderation")
     private boolean requestModeration = true;
 
-    @Column(columnDefinition = "varchar(512) default 'PENDING'")
+    @Column(name = "state")
     @Enumerated(EnumType.STRING)
-    private StateAction stateAction;
+    private StateAction state = StateAction.PENDING;
 
     @Column(name = "title", length = 120, nullable = false)
     @Size(min = 3, max = 120)
     private String title;
 
-    /*@ManyToMany
-    @Cascade({CascadeType.SAVE_UPDATE, CascadeType.MERGE, CascadeType.PERSIST})
-    @JoinColumn(name = "compilation_id")*/
     @ManyToMany(mappedBy = "eventList")
     private Set<Compilation> compilations;
-
 
 
 }

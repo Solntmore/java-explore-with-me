@@ -107,7 +107,7 @@ public class AdminController {
 
     @PostMapping("/compilations")
     public ResponseEntity<ResponseCompilationDto> postCompilations(
-            @RequestBody RequestCompilationDto requestCompilationDto) {
+            @RequestBody @Valid RequestCompilationDto requestCompilationDto) {
         log.debug("A Post/admin/compilations request was received. Post compilations");
 
 
@@ -116,7 +116,7 @@ public class AdminController {
     }
 
     @DeleteMapping("/compilations/{compId}")
-    public ResponseEntity<Void> postCompilations(@PathVariable long compId) {
+    public ResponseEntity<Void> deleteCompilations(@PathVariable long compId) {
         log.debug("A Delete/admin/compilations/{} request was received. Post compilations", compId);
         compilationsService.deleteCompilation(compId);
 
@@ -130,8 +130,6 @@ public class AdminController {
 
         return ResponseEntity.status(HttpStatus.OK).body(
                 compilationsService.patchCompilation(compId, requestCompilationDto));
-
-
     }
 }
 

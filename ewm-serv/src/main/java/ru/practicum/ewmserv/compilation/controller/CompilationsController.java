@@ -19,8 +19,10 @@ public class CompilationsController {
     private final CompilationsService compilationsService;
 
     @GetMapping
-    public ResponseEntity<ArrayList<ResponseCompilationDto>> getCompilations(@RequestParam Boolean pinned, @RequestParam(required = false, defaultValue = "0") int from,
-                                                                             @RequestParam(required = false, defaultValue = "10") int size) {
+    public ResponseEntity<ArrayList<ResponseCompilationDto>> getCompilations(
+            @RequestParam(required = false, defaultValue = "false") Boolean pinned,
+            @RequestParam(required = false, defaultValue = "0") int from,
+            @RequestParam(required = false, defaultValue = "10") int size) {
         log.debug("A Get/compilations request was received. Get compilations");
 
         return ResponseEntity.status(HttpStatus.OK).body(compilationsService.getCompilations(pinned, from, size));

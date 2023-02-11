@@ -2,11 +2,8 @@ package ru.practicum.ewmserv.event.dto;
 
 import lombok.Data;
 import ru.practicum.ewmserv.enums.AdminState;
-import ru.practicum.ewmserv.enums.StateAction;
 import ru.practicum.ewmserv.event.model.Location;
 
-import javax.persistence.Column;
-import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -26,11 +23,11 @@ public class UpdateEventAdminDto implements Serializable {
 
     private final Location location;
 
-    private final boolean paid;
+    private final Boolean paid;
 
-    private final int participantLimit;
+    private Integer participantLimit;
 
-    private final boolean requestModeration;
+    private final Boolean requestModeration;
 
     private final AdminState stateAction;
 

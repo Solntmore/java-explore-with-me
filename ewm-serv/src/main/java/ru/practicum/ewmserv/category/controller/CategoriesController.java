@@ -22,9 +22,9 @@ public class CategoriesController {
 
     @GetMapping
     public ResponseEntity<ArrayList<ResponseCategoryDto>> getCategories(@RequestParam(required = false, defaultValue = "0")
-                                                                            int from,
+                                                                        int from,
                                                                         @RequestParam(required = false, defaultValue = "10")
-                                                                            int size,
+                                                                        int size,
                                                                         HttpServletRequest request) {
         log.debug("A Get/categories request was received. Get category");
 

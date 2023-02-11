@@ -33,29 +33,35 @@ public class StatsService {
 
     public ArrayList<ViewStats> getStats(LocalDateTime start, LocalDateTime end, boolean unique,
                                          Collection<String> uris) {
-        if (!uris.isEmpty()) {
+        if (uris.isEmpty()) {
             if (unique) {
+
                 return (ArrayList<ViewStats>) hitRepository.getUniqueHitsBetweenDays(start, end)
                         .stream()
                         .map(hitMapper::toViewStatsEntity)
                         .collect(Collectors.toList());
             }
-            return (ArrayList<ViewStats>) hitRepository.getHitsBetweenDays(start, end)
+
+            return (ArrayList<ViewStats>) hitRepository
+                    .getHitsBetweenDays(start, end)
                     .stream()
                     .map(hitMapper::toViewStatsEntity)
                     .collect(Collectors.toList());
         }
 
         if (unique) {
-            return (ArrayList<ViewStats>) hitRepository.getHitsUniqueBetweenDaysFromUriList(start, end, uris)
+
+            return (ArrayList<ViewStats>) hitRepository
+                    .getHitsUniqueBetweenDaysFromUriList(start, end, uris)
                     .stream()
                     .map(hitMapper::toViewStatsEntity)
                     .collect(Collectors.toList());
         }
-        return (ArrayList<ViewStats>) hitRepository.getHitsBetweenDaysFromUriList(start, end, uris)
+
+        return (ArrayList<ViewStats>) hitRepository
+                .getHitsBetweenDaysFromUriList(start, end, uris)
                 .stream()
                 .map(hitMapper::toViewStatsEntity)
                 .collect(Collectors.toList());
-
     }
 }

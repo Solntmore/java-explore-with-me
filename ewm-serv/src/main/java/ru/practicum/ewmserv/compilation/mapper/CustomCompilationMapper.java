@@ -24,8 +24,7 @@ public class CustomCompilationMapper {
                 .map(eventMapper::toEventShortDto)
                 .collect(Collectors.toList());
 
-        return new ResponseCompilationDto(id, eventList, pinned, title);
-
+        return ResponseCompilationDto.builder().pinned(pinned).events(eventList).id(id).title(title).build();
 
     }
 }

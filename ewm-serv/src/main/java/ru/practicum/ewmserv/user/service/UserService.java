@@ -3,6 +3,7 @@ package ru.practicum.ewmserv.user.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import ru.practicum.ewmserv.category.exceptions.SqlConstraintViolationException;
 import ru.practicum.ewmserv.user.dto.RequestUserDto;
 import ru.practicum.ewmserv.user.dto.ResponseUserDto;
 import ru.practicum.ewmserv.user.exceptions.UserNotFoundException;
@@ -26,10 +27,14 @@ public class UserService {
 
 
     public ResponseUserDto postUser(RequestUserDto requestUserDto) {
-        User user = userRepository.save(
-                userMapper.toEntity(requestUserDto));
+        try {
+            User user = userRepository.save(
+                    userMapper.toEntity(requestUserDto));
 
-        return userMapper.toDto(user);
+            return userMapper.toDto(user);
+        } catch (RuntimeException e) {
+            throw new SqlConstraintViolationException(e.getMessage());
+        }
     }
 
     public void deleteUser(long userId) {

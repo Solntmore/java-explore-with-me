@@ -18,11 +18,11 @@ public interface EventMapper {
     @Mapping(source = "category", target = "category.id")
     Event partialUpdate(NewEventDto newEventDto, @MappingTarget Event event);
 
-    @Mapping(source = "stateAction", target = "state")
+    @Mapping(source = "state", target = "state")
     EventFullDto toEventFullDto(Event event);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(source = "state", target = "stateAction")
+    @Mapping(source = "state", target = "state")
     Event partialUpdateFromEventFullDto(EventFullDto eventFullDto, @MappingTarget Event event);
 
     Event toEntityFromEventShortDto(EventShortDto eventShortDto);

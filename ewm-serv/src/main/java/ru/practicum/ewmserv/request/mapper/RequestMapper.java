@@ -7,8 +7,8 @@ import ru.practicum.ewmserv.request.model.Request;
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = "spring")
 public interface RequestMapper {
 
-    @Mapping(source = "requesterId", target = "requester.id")
-    @Mapping(source = "eventId", target = "event.id")
+    @Mapping(source = "requester", target = "requester.id")
+    @Mapping(source = "event", target = "event.id")
     Request toEntity(ResponseRequestDto responseRequestDto);
 
     @InheritInverseConfiguration(name = "toEntity")

@@ -1,8 +1,6 @@
 package ru.practicum.ewmserv.compilation.model;
 
 import lombok.*;
-import org.hibernate.annotations.Cascade;
-/*import org.hibernate.annotations.CascadeType;*/
 import ru.practicum.ewmserv.event.model.Event;
 
 import javax.persistence.*;
@@ -22,15 +20,12 @@ public class Compilation {
     private Long id;
 
 
-        @ManyToMany(cascade = { CascadeType.ALL })
-        @JoinTable(
-                name = "compilations_events",
-                joinColumns = { @JoinColumn(name = "compilation_id") },
-                inverseJoinColumns = { @JoinColumn(name = "event_id") }
-        )
-    /*@ManyToMany
-    @Cascade({CascadeType.SAVE_UPDATE, CascadeType.MERGE, CascadeType.PERSIST})
-    @JoinColumn(name = "event_id")*/
+    @ManyToMany(cascade = {CascadeType.ALL})
+    @JoinTable(
+            name = "compilations_events",
+            joinColumns = {@JoinColumn(name = "compilation_id")},
+            inverseJoinColumns = {@JoinColumn(name = "event_id")}
+    )
     private List<Event> eventList;
 
     @Column(name = "pinned")

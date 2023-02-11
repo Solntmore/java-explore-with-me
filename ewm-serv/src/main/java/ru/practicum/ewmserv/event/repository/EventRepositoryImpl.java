@@ -31,9 +31,9 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
         Optional<Long> categoryId = Optional.ofNullable(updateEvent.getCategoryId());
         Optional<String> description = Optional.ofNullable(updateEvent.getDescription());
         Optional<Location> location = Optional.ofNullable(updateEvent.getLocation());
-        Optional<Boolean> paid = Optional.of(updateEvent.isPaid());
-        Optional<Integer> participantLimit = Optional.of(updateEvent.getParticipantLimit());
-        Optional<Boolean> requestModeration = Optional.of(updateEvent.isRequestModeration());
+        Optional<Boolean> paid = Optional.ofNullable(updateEvent.getPaid());
+        Optional<Integer> participantLimit = Optional.ofNullable(updateEvent.getParticipantLimit());
+        Optional<Boolean> requestModeration = Optional.ofNullable(updateEvent.getRequestModeration());
         Optional<AdminState> stateAction = Optional.ofNullable(updateEvent.getStateAction());
         Optional<String> title = Optional.ofNullable(updateEvent.getTitle());
 
@@ -52,10 +52,10 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
 
         if (stateAction.isPresent()) {
             if (stateAction.get() == AdminState.PUBLISH_EVENT) {
-                event.setStateAction(StateAction.PUBLISHED);
+                event.setState(StateAction.PUBLISHED);
                 event.setPublishedOn(LocalDateTime.now());
             } else {
-                event.setStateAction(StateAction.CANCELED);
+                event.setState(StateAction.CANCELED);
             }
         }
 
@@ -68,9 +68,9 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
         Optional<Long> categoryId = Optional.ofNullable(updateEvent.getCategoryId());
         Optional<String> description = Optional.ofNullable(updateEvent.getDescription());
         Optional<Location> location = Optional.ofNullable(updateEvent.getLocation());
-        Optional<Boolean> paid = Optional.of(updateEvent.isPaid());
-        Optional<Integer> participantLimit = Optional.of(updateEvent.getParticipantLimit());
-        Optional<Boolean> requestModeration = Optional.of(updateEvent.isRequestModeration());
+        Optional<Boolean> paid = Optional.ofNullable(updateEvent.getPaid());
+        Optional<Integer> participantLimit = Optional.ofNullable(updateEvent.getParticipantLimit());
+        Optional<Boolean> requestModeration = Optional.ofNullable(updateEvent.getRequestModeration());
         Optional<UserState> stateAction = Optional.ofNullable(updateEvent.getStateAction());
         Optional<String> title = Optional.ofNullable(updateEvent.getTitle());
 
@@ -89,7 +89,9 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
 
         if (stateAction.isPresent()) {
             if (stateAction.get() == UserState.CANCEL_REVIEW) {
-                event.setStateAction(StateAction.CANCELED);
+                event.setState(StateAction.CANCELED);
+            } else {
+                event.setState(StateAction.PENDING);
             }
         }
 

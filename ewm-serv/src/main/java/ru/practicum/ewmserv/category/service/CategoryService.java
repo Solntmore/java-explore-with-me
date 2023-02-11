@@ -8,6 +8,7 @@ import ru.practicum.StatsClient;
 import ru.practicum.ewmserv.category.dto.RequestCategoryDto;
 import ru.practicum.ewmserv.category.dto.ResponseCategoryDto;
 import ru.practicum.ewmserv.category.exceptions.CategoryNotFoundException;
+import ru.practicum.ewmserv.category.exceptions.SqlConstraintViolationException;
 import ru.practicum.ewmserv.category.mapper.CategoryMapper;
 import ru.practicum.ewmserv.category.model.Category;
 import ru.practicum.ewmserv.category.repository.CategoryRepository;
@@ -33,17 +34,26 @@ public class CategoryService {
 
 
     public ResponseCategoryDto postCategory(RequestCategoryDto requestCategoryDto) {
-        Category category = categoryRepository.save(
-                categoryMapper.toEntity(requestCategoryDto));
+        try {
+            Category category = categoryRepository.save(
+                    categoryMapper.toEntity(requestCategoryDto));
 
-        return categoryMapper.toDto(category);
+            return categoryMapper.toDto(category);
+        } catch (RuntimeException e) {
+            throw new SqlConstraintViolationException(e.getMessage());
+        }
     }
 
     public void deleteCategory(long catId) {
         if (!categoryRepository.existsById(catId)) {
             throw new CategoryNotFoundException("Category with id=" + catId + " was not found");
         }
-        categoryRepository.deleteById(catId);
+
+        try {
+            categoryRepository.deleteById(catId);
+        } catch (RuntimeException e) {
+            throw new SqlConstraintViolationException(e.getMessage());
+        }
     }
 
     public ResponseCategoryDto patchCategory(long catId, RequestCategoryDto requestCategoryDto) {
@@ -51,8 +61,11 @@ public class CategoryService {
 
         if (category.isPresent()) {
             Category newCategory = categoryMapper.partialUpdate(requestCategoryDto, category.get());
-            categoryRepository.save(newCategory);
-
+            try {
+                categoryRepository.save(newCategory);
+            } catch (RuntimeException e) {
+                throw new SqlConstraintViolationException(e.getMessage());
+            }
             return categoryMapper.toDto(newCategory);
         }
         throw new CategoryNotFoundException("Category with id=" + catId + " was not found");

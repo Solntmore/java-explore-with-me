@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.StatsClient;
-import ru.practicum.ViewStats;
 import ru.practicum.ewmserv.compilation.dto.RequestCompilationDto;
 import ru.practicum.ewmserv.compilation.dto.ResponseCompilationDto;
 import ru.practicum.ewmserv.compilation.exceptions.CompilationNotFoundException;
@@ -45,7 +44,6 @@ public class CompilationsService {
     private final EventMapper eventMapper;
 
     public ResponseCompilationDto postCompilation(RequestCompilationDto requestCompilationDto) {
-
         Compilation compilation = setEvents(
                 compilationsMapper.toEntity(requestCompilationDto), requestCompilationDto);
         ResponseCompilationDto responseCompilationDto = compilationsMapper.toDto(
@@ -57,12 +55,12 @@ public class CompilationsService {
     public ResponseCompilationDto patchCompilation(long compId, RequestCompilationDto requestCompilationDto) {
         Compilation oldCompilation = compilationRepository.findById(compId).orElseThrow(() ->
                 new CompilationNotFoundException("Compilation with id " + compId + " was not found"));
-
         Compilation newCompilation = setEvents(
                 compilationsMapper.toEntity(requestCompilationDto), requestCompilationDto);
 
+        Compilation saveCompilation = compilationsMapper.partialUpdate(newCompilation, oldCompilation);
         ResponseCompilationDto responseCompilationDto = compilationsMapper.toDto(
-                compilationRepository.patchCompilationByAdmin(oldCompilation, newCompilation));
+                compilationRepository.save(saveCompilation));
 
         return mapEventList(newCompilation, responseCompilationDto);
     }
@@ -102,7 +100,7 @@ public class CompilationsService {
     private ArrayList<ResponseCompilationDto> setViewsAndConfirmedRequestsForList(List<ResponseCompilationDto>
                                                                                           responseCompilations) {
         for (ResponseCompilationDto compilation : responseCompilations) {
-            compilation.getEventList()
+            compilation.getEvents()
                     .stream()
                     .map(eventShortDto -> setViewsAndConfirmedRequests(eventShortDto))
                     .collect(Collectors.toList());
@@ -117,7 +115,7 @@ public class CompilationsService {
                 .map(eventShortDto -> setViewsAndConfirmedRequests(eventShortDto))
                 .collect(Collectors.toList());
 
-        responseCompilationDto.setEventList(fullEvents);
+        responseCompilationDto.setEvents(fullEvents);
 
         return responseCompilationDto;
     }
@@ -131,7 +129,7 @@ public class CompilationsService {
     }
 
     private Compilation setEvents(Compilation compilation, RequestCompilationDto requestCompilationDto) {
-        ArrayList<Event> events = new ArrayList<>();
+        List<Event> events = new ArrayList<>();
 
         if (requestCompilationDto.getEvents().isEmpty()) {
             compilation.setEventList(events);
@@ -142,15 +140,14 @@ public class CompilationsService {
                 .ids(requestCompilationDto.getEvents()).build();
 
         BooleanBuilder parameters = makeBooleanBuilder(filter);
-        events = (ArrayList<Event>) eventRepository
-                .findAll(parameters, PageRequest.of(0, 100)).getContent();
+        events = eventRepository.findAll(parameters, PageRequest.of(0, 100)).getContent();
 
         compilation.setEventList(events);
 
         return compilation;
     }
 
-    private ArrayList<ViewStats> getStatsList(String start, String end, Collection<String> uris, boolean flag) {
+    private List<Long> getStatsList(String start, String end, Collection<String> uris, boolean flag) {
         return statsClient.getStats(start, end, uris, flag);
     }
 
@@ -161,12 +158,12 @@ public class CompilationsService {
 
         eventShortDto.setConfirmedRequests(requestRepository.countRequestByStatusEqualsAndEvent_Id
                 (RequestStatus.CONFIRMED, eventShortDto.getId()));
-        ArrayList<ViewStats> stats = getStatsList(start, end, List.of(uri), false);
+        List<Long> stats = getStatsList(start, end, List.of(uri), false);
 
         if (stats.size() == 0) {
             eventShortDto.setViews(0L);
         } else {
-            eventShortDto.setViews(stats.get(0).getHits());
+            eventShortDto.setViews(stats.get(0));
         }
         return eventShortDto;
     }

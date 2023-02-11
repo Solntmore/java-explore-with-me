@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.RequestHitDto;
 import ru.practicum.StatsClient;
-import ru.practicum.ViewStats;
 import ru.practicum.ewmserv.category.exceptions.CategoryNotFoundException;
 import ru.practicum.ewmserv.category.model.Category;
 import ru.practicum.ewmserv.category.repository.CategoryRepository;
@@ -31,10 +30,7 @@ import ru.practicum.ewmserv.user.repository.UserRepository;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.practicum.ewmserv.configuration.AppConfig.DATE_TIME_FORMATTER;
@@ -54,15 +50,25 @@ public class EventService {
 
     @Transactional
     public EventFullDto postEvent(long userId, NewEventDto newEventDto) {
+        LocalDateTime start = LocalDateTime.now();
+
+        if (newEventDto.getEventDate().isBefore(start)) {
+            throw new NotAllowToEditEventException("Event date should be in future");
+        }
+
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new UserNotFoundException("User with id=" + userId + " was not found"));
         Category category = categoryRepository.findById(newEventDto.getCategory()).orElseThrow(() ->
                 new CategoryNotFoundException("Category was not found"));
-        LocalDateTime start = LocalDateTime.now();
+
         Event event = eventMapper.toEntityFromNewEventDto(newEventDto);
         event.setInitiator(user);
         event.setCreatedOn(start);
         event.setCategory(category);
+
+        if (event.getParticipantLimit() == 0) {
+            event.setParticipantLimit(5000000);
+        }
 
         EventFullDto saveEvent = eventMapper.toEventFullDto(eventRepository.save(event));
         saveEvent.setViews(0L);
@@ -76,20 +82,29 @@ public class EventService {
                 new EventNotFoundException("Event with id=" + eventId + " was not found"));
         addHit(request);
         EventFullDto eventFullDto = eventMapper.toEventFullDto(event);
+
         return setViewsAndConfirmedRequests(eventFullDto, eventId);
     }
 
     public EventFullDto patchEventById(long eventId, UpdateEventAdminDto updateEventAdminDto) {
         Event event = eventRepository.findById(eventId).orElseThrow(() ->
                 new EventNotFoundException("Event with id=" + eventId + " was not found"));
+        LocalDateTime now = LocalDateTime.now();
 
-
-        if (LocalDateTime.now().plusHours(1).isAfter(event.getEventDate())) {
-            throw new NotAllowToEditEventException("You are not allow event, if before start less then 1 hour");
+        if (updateEventAdminDto.getEventDate() != null && updateEventAdminDto.getEventDate().isBefore(now)) {
+            throw new NotAllowToEditEventException("You are not allow to edit event, if new event date in past");
         }
 
-        if (!event.getStateAction().equals(StateAction.PENDING)) {
-            throw new NotAllowToEditEventException("You are not allow event, if stateAction is not Pending");
+        if (now.plusHours(1).isAfter(event.getEventDate())) {
+            throw new NotAllowToEditEventException("You are not allow to edit event, if before start less then 1 hour");
+        }
+
+        if (!event.getState().equals(StateAction.PENDING)) {
+            throw new NotAllowToEditEventException("You are not allow to edit event, if stateAction is not Pending");
+        }
+
+        if (updateEventAdminDto.getParticipantLimit() != null && updateEventAdminDto.getParticipantLimit() == 0) {
+            updateEventAdminDto.setParticipantLimit(5000000);
         }
 
         EventFullDto eventFullDto = eventMapper.toEventFullDto(
@@ -100,13 +115,30 @@ public class EventService {
     public EventFullDto patchEventByUserIdAndEventId(long userId, long eventId, EventPatchDto eventPatchDto) {
         Event event = eventRepository.findById(eventId).orElseThrow(() ->
                 new EventNotFoundException("Event with id=" + eventId + " was not found"));
+        LocalDateTime now = LocalDateTime.now();
 
-        if (event.getStateAction().equals(StateAction.PUBLISHED)) {
+        Optional<Integer> participantLimit = Optional.ofNullable(eventPatchDto.getParticipantLimit());
+        Optional<LocalDateTime> eventDate = Optional.ofNullable(eventPatchDto.getEventDate());
+
+
+        if (event.getState().equals(StateAction.PUBLISHED)) {
             throw new NotAllowToEditEventException("You are not allow event, if stateAction is Published");
         }
 
-        if (LocalDateTime.now().plusHours(2).isAfter(event.getEventDate())) {
+        if (now.plusHours(2).isAfter(event.getEventDate())) {
             throw new NotAllowToEditEventException("You are not edit event, if before start less then 2 hours");
+        }
+
+        if (eventDate.isPresent()) {
+            if (now.plusHours(2).isAfter(eventDate.get())) {
+                throw new NotAllowToEditEventException("You are not edit event, if before start less then 2 hours");
+            }
+        }
+
+        if (participantLimit.isPresent()) {
+            if (participantLimit.get() == 0) {
+                eventPatchDto.setParticipantLimit(5000000);
+            }
         }
 
         EventFullDto eventFullDto = eventMapper.toEventFullDto(
@@ -153,6 +185,7 @@ public class EventService {
         EventFilterForUser filter = makeUserFilter(text, categories, paid, rangeStart, rangeEnd, onlyAvailable);
         BooleanBuilder parameters = makeBooleanBuilder(filter);
         List<Event> events = eventRepository.findAll(parameters, PageRequest.of(from, size)).getContent();
+
         ArrayList<EventShortDto> fullEvents = (ArrayList<EventShortDto>) events.stream()
                 .map(eventMapper::toEventShortDto)
                 .map(eventShortDto -> setViewsAndConfirmedRequests(eventShortDto))
@@ -189,12 +222,12 @@ public class EventService {
 
         eventFullDto.setConfirmedRequests(requestRepository.countRequestByStatusEqualsAndEvent_Id
                 (RequestStatus.CONFIRMED, eventId));
-        ArrayList<ViewStats> stats = getStatsList(start, end, List.of(uri), false);
+        List<Long> stats = getStatsList(start, end, List.of(uri), false);
 
         if (stats.size() == 0) {
             eventFullDto.setViews(0L);
         } else {
-            eventFullDto.setViews(stats.get(0).getHits());
+            eventFullDto.setViews(stats.get(0));
         }
         return eventFullDto;
     }
@@ -206,12 +239,12 @@ public class EventService {
 
         eventShortDto.setConfirmedRequests(requestRepository.countRequestByStatusEqualsAndEvent_Id
                 (RequestStatus.CONFIRMED, eventShortDto.getId()));
-        ArrayList<ViewStats> stats = getStatsList(start, end, List.of(uri), false);
+        List<Long> stats = getStatsList(start, end, List.of(uri), false);
 
         if (stats.size() == 0) {
             eventShortDto.setViews(0L);
         } else {
-            eventShortDto.setViews(stats.get(0).getHits());
+            eventShortDto.setViews(stats.get(0));
         }
         return eventShortDto;
     }
@@ -222,7 +255,7 @@ public class EventService {
         statsClient.saveRequest(requestHitDto);
     }
 
-    private ArrayList<ViewStats> getStatsList(String start, String end, Collection<String> uris, boolean flag) {
+    private List<Long> getStatsList(String start, String end, Collection<String> uris, boolean flag) {
         return statsClient.getStats(start, end, uris, flag);
     }
 
@@ -290,7 +323,7 @@ public class EventService {
             builder.and(QEvent.event.initiator.id.in(filter.getUsers()));
         }
         if (filter.getStates() != null && !filter.getStates().isEmpty()) {
-            builder.and(QEvent.event.stateAction.in(filter.getStates()));
+            builder.and(QEvent.event.state.in(filter.getStates()));
         }
         if (filter.getCategories() != null && !filter.getCategories().isEmpty()) {
             builder.and(QEvent.event.category.id.in(filter.getCategories()));

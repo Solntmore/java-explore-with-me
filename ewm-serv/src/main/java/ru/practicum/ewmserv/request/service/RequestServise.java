@@ -46,11 +46,11 @@ public class RequestServise {
             throw new NotAllowTakeRequestException("Initiator not allow to be a requester");
         }
 
-        if (!requestRepository.existsByRequester_IdAndEvent_Id(userId, eventId)) {
+        if (requestRepository.existsByRequester_IdAndEvent_Id(userId, eventId)) {
             throw new NotAllowTakeRequestException("Requester not allow to make more then 1 request");
         }
 
-        if (!event.getStateAction().equals(StateAction.PUBLISHED)) {
+        if (!event.getState().equals(StateAction.PUBLISHED)) {
             throw new NotAllowTakeRequestException("Requester not allow to make a request on not published event");
         }
 
@@ -87,7 +87,7 @@ public class RequestServise {
             throw new NotRequesterIdException("Only requester or initiator allow to cancel request");
         }
 
-        request.setStatus(RequestStatus.REJECTED);
+        request.setStatus(RequestStatus.CANCELED);
 
         return requestMapper.toDto(requestRepository.save(request));
     }
@@ -109,12 +109,15 @@ public class RequestServise {
             throw new UserNotFoundException("User with id=" + userId + " was not found");
         }
 
-        if (!eventRepository.existsById(eventId)) {
-            throw new EventNotFoundException("Event with id=" + userId + " was not found");
+        Event event = eventRepository.findById(eventId).orElseThrow(() ->
+                new EventNotFoundException("Event with id=" + eventId + " was not found"));
+
+        if (event.getInitiator().getId() != userId) {
+            throw new NotAllowTakeRequestException("Only initiator of event allow to check requests");
         }
 
         return (ArrayList<ResponseRequestDto>) requestRepository
-                .findAllByRequester_IdAndEvent_IdAndStatusIsNot(userId, eventId, RequestStatus.REJECTED)
+                .findAllByEvent_Id(eventId)
                 .stream()
                 .map(requestMapper::toDto)
                 .collect(Collectors.toList());

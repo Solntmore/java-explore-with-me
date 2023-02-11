@@ -16,9 +16,9 @@ public class ResponseRequestDto implements Serializable {
 
     private final LocalDateTime created;
 
-    private final Long eventId;
+    private final Long event;
 
-    private final Long requesterId;
+    private final Long requester;
 
     private final RequestStatus status;
 }

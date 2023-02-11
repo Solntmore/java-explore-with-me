@@ -12,8 +12,9 @@ public interface CompilationsMapper {
 
     Compilation toEntity(RequestCompilationDto requestCompilationDto);
 
+    @Mapping(source = "eventList", target = "events")
     ResponseCompilationDto toDto(Compilation compilation);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    Compilation partialUpdate(ResponseCompilationDto responseCompilationDto, @MappingTarget Compilation compilation);
+    Compilation partialUpdate(Compilation newCompilation, @MappingTarget Compilation compilation);
 }

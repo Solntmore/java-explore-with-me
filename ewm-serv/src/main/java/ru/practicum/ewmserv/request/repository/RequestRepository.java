@@ -1,7 +1,6 @@
 package ru.practicum.ewmserv.request.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import ru.practicum.ewmserv.enums.RequestStatus;
 import ru.practicum.ewmserv.request.model.Request;
 
@@ -15,12 +14,9 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
 
     List<Request> findAllByRequester_Id(Long requesterId);
 
-    @Query("SELECT COUNT(r.status) as c FROM Request r WHERE r.status = ?1")
-    Integer countRequestByStatus(RequestStatus requestStatus);
-
     Integer countRequestByStatusEqualsAndEvent_Id(RequestStatus requestStatus, Long eventId);
 
-    List<Request> findAllByRequester_IdAndEvent_IdAndStatusIsNot(Long userId, Long eventId, RequestStatus requestStatus);
+    List<Request> findAllByEvent_Id(Long eventId);
 
     boolean existsByRequester_IdAndEvent_Id(Long userId, Long eventId);
 
