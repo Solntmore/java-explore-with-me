@@ -44,5 +44,4 @@ public class EventController {
                 rangeEnd, onlyAvailable, sort, from, size, request));
 
     }
-
 }

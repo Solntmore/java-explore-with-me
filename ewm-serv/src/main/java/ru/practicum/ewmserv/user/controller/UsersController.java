@@ -6,10 +6,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.ewmserv.comment.dto.CreateCommentDto;
+import ru.practicum.ewmserv.comment.dto.PatchCommentDto;
+import ru.practicum.ewmserv.comment.dto.ResponseCommentDto;
+import ru.practicum.ewmserv.comment.service.CommentService;
 import ru.practicum.ewmserv.event.dto.EventFullDto;
 import ru.practicum.ewmserv.event.dto.EventPatchDto;
 import ru.practicum.ewmserv.event.dto.EventShortDto;
 import ru.practicum.ewmserv.event.dto.NewEventDto;
+import ru.practicum.ewmserv.event.repository.EventRepository;
 import ru.practicum.ewmserv.event.service.EventService;
 import ru.practicum.ewmserv.request.dto.ResponseRequestDto;
 import ru.practicum.ewmserv.request.service.RequestServise;
@@ -24,10 +29,13 @@ import java.util.ArrayList;
 @RequiredArgsConstructor
 @RequestMapping(path = "/users")
 public class UsersController {
+    private final EventRepository eventRepository;
 
     private final EventService eventService;
 
     private final RequestServise requestServise;
+
+    private final CommentService commentService;
 
     @GetMapping("/{userId}/events")
     public ResponseEntity<ArrayList<EventShortDto>> getEventsByAuthorId(@PathVariable long userId,
@@ -110,6 +118,36 @@ public class UsersController {
                 "Cancel request to take part in event", userId, requestId);
 
         return ResponseEntity.status(HttpStatus.OK).body(requestServise.cancelRequest(userId, requestId));
+    }
+
+    @PostMapping("/{userId}/comment/{eventId}")
+    public ResponseEntity<ResponseCommentDto> createComment(@PathVariable long userId, @PathVariable long eventId,
+                                                            @RequestBody CreateCommentDto comment) {
+        log.debug("A Post/users/{}/comment/{} request was received. User {} create comment to event {}", userId, eventId,
+                userId, eventId);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(commentService.createComment(userId, eventId, comment));
+    }
+
+    @DeleteMapping("/{userId}/comment/{commentId}")
+    public ResponseEntity<Void> deleteComment(@PathVariable long userId, @PathVariable long commentId) {
+        log.debug("A Delete/users/{}/comment/{} request was received. User {} delete comment {}", userId, commentId,
+                userId, commentId);
+        commentService.deleteComment(userId, commentId);
+
+        return ResponseEntity.status(204).build();
+    }
+
+    @PatchMapping("/{userId}/comment/{commentId}")
+    public ResponseEntity<ResponseCommentDto> patchComment(@PathVariable long userId, @PathVariable long commentId,
+                                              @RequestBody PatchCommentDto comment) {
+        log.debug("A Patch/users/{}/comment/{} request was received. User {} patch comment {}", userId, commentId,
+                userId, commentId);
+        commentService.deleteComment(userId, commentId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(commentService.patchComment(userId, commentId, comment));
     }
 
 
