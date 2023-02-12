@@ -122,7 +122,7 @@ public class UsersController {
 
     @PostMapping("/{userId}/comment/{eventId}")
     public ResponseEntity<ResponseCommentDto> createComment(@PathVariable long userId, @PathVariable long eventId,
-                                                            @RequestBody CreateCommentDto comment) {
+                                                            @Valid @RequestBody CreateCommentDto comment) {
         log.debug("A Post/users/{}/comment/{} request was received. User {} create comment to event {}", userId, eventId,
                 userId, eventId);
 
@@ -141,10 +141,9 @@ public class UsersController {
 
     @PatchMapping("/{userId}/comment/{commentId}")
     public ResponseEntity<ResponseCommentDto> patchComment(@PathVariable long userId, @PathVariable long commentId,
-                                              @RequestBody PatchCommentDto comment) {
+                                                           @Valid @RequestBody PatchCommentDto comment) {
         log.debug("A Patch/users/{}/comment/{} request was received. User {} patch comment {}", userId, commentId,
                 userId, commentId);
-        commentService.deleteComment(userId, commentId);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(commentService.patchComment(userId, commentId, comment));
