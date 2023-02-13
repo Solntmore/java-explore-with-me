@@ -26,7 +26,7 @@ public class UserService {
     private final UserMapper userMapper;
 
 
-    public ResponseUserDto postUser(RequestUserDto requestUserDto) {
+    public ResponseUserDto addUser(RequestUserDto requestUserDto) {
         try {
             User user = userRepository.save(
                     userMapper.toEntity(requestUserDto));
@@ -44,10 +44,10 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
-    public ArrayList<ResponseUserDto> getUsers(Integer[] ids, PageRequest pageRequest) {
+    public List<ResponseUserDto> getUsers(Integer[] ids, PageRequest pageRequest) {
         Collection<Long> idList = Arrays.stream(ids).map(Integer::longValue).collect(Collectors.toList());
         List<User> users = userRepository.getUsers(idList, pageRequest).getContent();
 
-        return (ArrayList<ResponseUserDto>) users.stream().map(userMapper::toDto).collect(Collectors.toList());
+        return users.stream().map(userMapper::toDto).collect(Collectors.toList());
     }
 }

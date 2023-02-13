@@ -16,7 +16,6 @@ import ru.practicum.ewmserv.category.repository.CategoryRepository;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,7 +32,7 @@ public class CategoryService {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 
-    public ResponseCategoryDto postCategory(RequestCategoryDto requestCategoryDto) {
+    public ResponseCategoryDto addCategory(RequestCategoryDto requestCategoryDto) {
         try {
             Category category = categoryRepository.save(
                     categoryMapper.toEntity(requestCategoryDto));
@@ -56,7 +55,7 @@ public class CategoryService {
         }
     }
 
-    public ResponseCategoryDto patchCategory(long catId, RequestCategoryDto requestCategoryDto) {
+    public ResponseCategoryDto updateCategory(long catId, RequestCategoryDto requestCategoryDto) {
         Optional<Category> category = categoryRepository.findById(catId);
 
         if (category.isPresent()) {
@@ -79,19 +78,17 @@ public class CategoryService {
         return categoryMapper.toDto(category);
     }
 
-    public ArrayList<ResponseCategoryDto> getCategories(PageRequest pageRequest, HttpServletRequest request) {
+    public List<ResponseCategoryDto> getCategories(PageRequest pageRequest, HttpServletRequest request) {
         addHit(request);
         List<Category> categories = categoryRepository.findAll(pageRequest).getContent();
 
-        return (ArrayList<ResponseCategoryDto>) categories.stream()
-                .map(categoryMapper::toDto)
-                .collect(Collectors.toList());
+        return categories.stream().map(categoryMapper::toDto).collect(Collectors.toList());
     }
 
     private void addHit(HttpServletRequest request) {
         RequestHitDto requestHitDto = RequestHitDto.builder().app("ewm-serv").uri(request.getRequestURI())
                 .ip(request.getRemoteAddr()).timestamp(LocalDateTime.now().format(formatter)).build();
-        statsClient.saveRequest(requestHitDto);
 
+        statsClient.saveRequest(requestHitDto);
     }
 }

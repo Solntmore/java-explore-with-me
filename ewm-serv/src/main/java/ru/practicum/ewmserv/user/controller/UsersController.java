@@ -14,7 +14,6 @@ import ru.practicum.ewmserv.event.dto.EventFullDto;
 import ru.practicum.ewmserv.event.dto.EventPatchDto;
 import ru.practicum.ewmserv.event.dto.EventShortDto;
 import ru.practicum.ewmserv.event.dto.NewEventDto;
-import ru.practicum.ewmserv.event.repository.EventRepository;
 import ru.practicum.ewmserv.event.service.EventService;
 import ru.practicum.ewmserv.request.dto.ResponseRequestDto;
 import ru.practicum.ewmserv.request.service.RequestServise;
@@ -23,13 +22,13 @@ import ru.practicum.ewmserv.user.model.UpdateListForRequests;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/users")
 public class UsersController {
-    private final EventRepository eventRepository;
 
     private final EventService eventService;
 
@@ -38,10 +37,10 @@ public class UsersController {
     private final CommentService commentService;
 
     @GetMapping("/{userId}/events")
-    public ResponseEntity<ArrayList<EventShortDto>> getEventsByAuthorId(@PathVariable long userId,
-                                                                        @RequestParam(required = false, defaultValue = "0")
+    public ResponseEntity<List<EventShortDto>> getEventsByAuthorId(@PathVariable long userId,
+                                                                   @RequestParam(required = false, defaultValue = "0")
                                                                         int from,
-                                                                        @RequestParam(required = false, defaultValue = "10")
+                                                                   @RequestParam(required = false, defaultValue = "10")
                                                                         int size) {
         log.debug("A Get/users/{}/events request was received. Get events posted by author id", userId);
 
@@ -146,7 +145,7 @@ public class UsersController {
                 userId, commentId);
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(commentService.patchComment(userId, commentId, comment));
+                .body(commentService.updateComment(userId, commentId, comment));
     }
 
 

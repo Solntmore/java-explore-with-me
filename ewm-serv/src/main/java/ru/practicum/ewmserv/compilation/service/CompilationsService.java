@@ -43,7 +43,7 @@ public class CompilationsService {
     private final StatsClient statsClient;
     private final EventMapper eventMapper;
 
-    public ResponseCompilationDto postCompilation(RequestCompilationDto requestCompilationDto) {
+    public ResponseCompilationDto addCompilation(RequestCompilationDto requestCompilationDto) {
         Compilation compilation = setEvents(
                 compilationsMapper.toEntity(requestCompilationDto), requestCompilationDto);
         ResponseCompilationDto responseCompilationDto = compilationsMapper.toDto(
@@ -52,7 +52,7 @@ public class CompilationsService {
         return mapEventList(compilation, responseCompilationDto);
     }
 
-    public ResponseCompilationDto patchCompilation(long compId, RequestCompilationDto requestCompilationDto) {
+    public ResponseCompilationDto updateCompilation(long compId, RequestCompilationDto requestCompilationDto) {
         Compilation oldCompilation = compilationRepository.findById(compId).orElseThrow(() ->
                 new CompilationNotFoundException("Compilation with id " + compId + " was not found"));
         Compilation newCompilation = setEvents(
@@ -81,7 +81,7 @@ public class CompilationsService {
         return mapEventList(compilation, responseCompilationDto);
     }
 
-    public ArrayList<ResponseCompilationDto> getCompilations(Boolean pinned, int from, int size) {
+    public List<ResponseCompilationDto> getCompilations(Boolean pinned, int from, int size) {
         List<Compilation> compilations;
 
         if (pinned == null) {
@@ -97,8 +97,8 @@ public class CompilationsService {
         return setViewsAndConfirmedRequestsForList(responseCompilations);
     }
 
-    private ArrayList<ResponseCompilationDto> setViewsAndConfirmedRequestsForList(List<ResponseCompilationDto>
-                                                                                          responseCompilations) {
+    private List<ResponseCompilationDto> setViewsAndConfirmedRequestsForList(List<ResponseCompilationDto>
+                                                                                     responseCompilations) {
         for (ResponseCompilationDto compilation : responseCompilations) {
             compilation.getEvents()
                     .stream()
@@ -106,7 +106,7 @@ public class CompilationsService {
                     .collect(Collectors.toList());
         }
 
-        return (ArrayList<ResponseCompilationDto>) responseCompilations;
+        return responseCompilations;
     }
 
     private ResponseCompilationDto mapEventList(Compilation compilation, ResponseCompilationDto responseCompilationDto) {

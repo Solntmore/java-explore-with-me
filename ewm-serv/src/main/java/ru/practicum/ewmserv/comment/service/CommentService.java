@@ -65,7 +65,7 @@ public class CommentService {
         commentRepository.deleteById(commentId);
     }
 
-    public ResponseCommentDto patchComment(long userId, long commentId, PatchCommentDto patchComment) {
+    public ResponseCommentDto updateComment(long userId, long commentId, PatchCommentDto patchComment) {
         if (!userRepository.existsById(userId)) {
             throw new UserNotFoundException("User with id " + userId + " not found");
         }

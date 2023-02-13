@@ -30,7 +30,10 @@ import ru.practicum.ewmserv.user.repository.UserRepository;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ru.practicum.ewmserv.configuration.AppConfig.DATE_TIME_FORMATTER;
@@ -86,7 +89,7 @@ public class EventService {
         return setViewsAndConfirmedRequests(eventFullDto, eventId);
     }
 
-    public EventFullDto patchEventById(long eventId, UpdateEventAdminDto updateEventAdminDto) {
+    public EventFullDto updateEventById(long eventId, UpdateEventAdminDto updateEventAdminDto) {
         Event event = eventRepository.findById(eventId).orElseThrow(() ->
                 new EventNotFoundException("Event with id=" + eventId + " was not found"));
         LocalDateTime now = LocalDateTime.now();
@@ -142,14 +145,14 @@ public class EventService {
         return setViewsAndConfirmedRequests(eventFullDto, eventId);
     }
 
-    public ArrayList<EventShortDto> getEventsByAuthorId(long userId, PageRequest pageRequest) {
+    public List<EventShortDto> getEventsByAuthorId(long userId, PageRequest pageRequest) {
         if (!userRepository.existsById(userId)) {
             throw new UserNotFoundException("User with id=" + userId + " was not found");
         }
 
         List<Event> events = eventRepository.findAllByInitiatorId(userId, pageRequest).getContent();
 
-        return (ArrayList<EventShortDto>) events.stream()
+        return events.stream()
                 .map(eventMapper::toEventShortDto)
                 .map(eventShortDto -> setViewsAndConfirmedRequests(eventShortDto))
                 .collect(Collectors.toList());
@@ -174,15 +177,15 @@ public class EventService {
         return setViewsAndConfirmedRequests(eventFullDto, eventId);
     }
 
-    public ArrayList<EventShortDto> getEventsForUser(String text, List<Long> categories, Boolean paid, String rangeStart,
-                                                     String rangeEnd, Boolean onlyAvailable, String sort, int from,
-                                                     int size, HttpServletRequest request) {
+    public List<EventShortDto> getEventsForUser(String text, List<Long> categories, Boolean paid, String rangeStart,
+                                                String rangeEnd, Boolean onlyAvailable, String sort, int from,
+                                                int size, HttpServletRequest request) {
         addHit(request);
         EventFilterForUser filter = makeUserFilter(text, categories, paid, rangeStart, rangeEnd, onlyAvailable);
         BooleanBuilder parameters = makeBooleanBuilder(filter);
         List<Event> events = eventRepository.findAll(parameters, PageRequest.of(from, size)).getContent();
 
-        ArrayList<EventShortDto> fullEvents = (ArrayList<EventShortDto>) events.stream()
+        List<EventShortDto> fullEvents = events.stream()
                 .map(eventMapper::toEventShortDto)
                 .map(eventShortDto -> setViewsAndConfirmedRequests(eventShortDto))
                 .collect(Collectors.toList());
@@ -199,13 +202,13 @@ public class EventService {
         return fullEvents;
     }
 
-    public ArrayList<EventFullDto> getEventsForAdmin(List<Long> users, List<StateAction> states, List<Long> categories,
-                                                     String rangeStart, String rangeEnd, int from, int size) {
+    public List<EventFullDto> getEventsForAdmin(List<Long> users, List<StateAction> states, List<Long> categories,
+                                                String rangeStart, String rangeEnd, int from, int size) {
         EventFilterForAdmin filter = makeAdminFilter(users, states, categories, rangeStart, rangeEnd);
         BooleanBuilder parameters = makeBooleanBuilder(filter);
         List<Event> events = eventRepository.findAll(parameters, PageRequest.of(from, size)).getContent();
 
-        return (ArrayList<EventFullDto>) events.stream()
+        return events.stream()
                 .map(eventMapper::toEventFullDto)
                 .map(eventFullDto -> setViewsAndConfirmedRequests(eventFullDto, eventFullDto.getId()))
                 .collect(Collectors.toList());

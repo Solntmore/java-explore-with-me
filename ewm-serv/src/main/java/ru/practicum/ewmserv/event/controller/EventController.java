@@ -29,7 +29,7 @@ public class EventController {
     }
 
     @GetMapping
-    public ResponseEntity<ArrayList<EventShortDto>> getEvents(@RequestParam(required = false) String text,
+    public ResponseEntity<List<EventShortDto>> getEvents(@RequestParam(required = false) String text,
                                                               @RequestParam(required = false) List<Long> categories,
                                                               @RequestParam(required = false) Boolean paid,
                                                               @RequestParam(required = false) String rangeStart,

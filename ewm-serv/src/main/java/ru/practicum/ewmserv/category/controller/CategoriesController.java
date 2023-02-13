@@ -10,7 +10,7 @@ import ru.practicum.ewmserv.category.dto.ResponseCategoryDto;
 import ru.practicum.ewmserv.category.service.CategoryService;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -21,11 +21,11 @@ public class CategoriesController {
     private final CategoryService categoryService;
 
     @GetMapping
-    public ResponseEntity<ArrayList<ResponseCategoryDto>> getCategories(@RequestParam(required = false, defaultValue = "0")
+    public ResponseEntity<List<ResponseCategoryDto>> getCategories(@RequestParam(required = false, defaultValue = "0")
                                                                         int from,
-                                                                        @RequestParam(required = false, defaultValue = "10")
+                                                                   @RequestParam(required = false, defaultValue = "10")
                                                                         int size,
-                                                                        HttpServletRequest request) {
+                                                                   HttpServletRequest request) {
         log.debug("A Get/categories request was received. Get category");
 
         return ResponseEntity.status(HttpStatus.OK).body(categoryService.getCategories(PageRequest.of(from, size), request));
