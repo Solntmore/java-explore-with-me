@@ -129,16 +129,12 @@ public class EventService {
             throw new NotAllowToEditEventException("You are not edit event, if before start less then 2 hours");
         }
 
-        if (eventDate.isPresent()) {
-            if (now.plusHours(2).isAfter(eventDate.get())) {
-                throw new NotAllowToEditEventException("You are not edit event, if before start less then 2 hours");
-            }
+        if (eventDate.isPresent() && now.plusHours(2).isAfter(eventDate.get())) {
+            throw new NotAllowToEditEventException("You are not edit event, if before start less then 2 hours");
         }
 
-        if (participantLimit.isPresent()) {
-            if (participantLimit.get() == 0) {
-                eventPatchDto.setParticipantLimit(5000000);
-            }
+        if (participantLimit.isPresent() && participantLimit.get() == 0) {
+            eventPatchDto.setParticipantLimit(5000000);
         }
 
         EventFullDto eventFullDto = eventMapper.toEventFullDto(
