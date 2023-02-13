@@ -99,12 +99,12 @@ public class CompilationsService {
 
     private List<ResponseCompilationDto> setViewsAndConfirmedRequestsForList(List<ResponseCompilationDto>
                                                                                      responseCompilations) {
-        for (ResponseCompilationDto compilation : responseCompilations) {
-            compilation.getEvents()
-                    .stream()
-                    .map(eventShortDto -> setViewsAndConfirmedRequests(eventShortDto))
-                    .collect(Collectors.toList());
-        }
+
+        responseCompilations.stream()
+                .map(ResponseCompilationDto::getEvents)
+                .flatMap(eventShortDtos -> eventShortDtos.stream()
+                        .map(eventShortDto -> setViewsAndConfirmedRequests(eventShortDto)))
+                .collect(Collectors.toList());
 
         return responseCompilations;
     }
