@@ -147,7 +147,7 @@ public class EventService {
             throw new UserNotFoundException("User with id=" + userId + " was not found");
         }
 
-        List<Event> events = eventRepository.findAllByInitiator_Id(userId, pageRequest).getContent();
+        List<Event> events = eventRepository.findAllByInitiatorId(userId, pageRequest).getContent();
 
         return (ArrayList<EventShortDto>) events.stream()
                 .map(eventMapper::toEventShortDto)
@@ -165,7 +165,7 @@ public class EventService {
         }
 
         EventFullDto eventFullDto = eventMapper.toEventFullDto(
-                eventRepository.findByIdAndInitiator_Id(eventId, userId));
+                eventRepository.findByIdAndInitiatorId(eventId, userId));
 
         if (eventFullDto.getInitiator().getId() != userId) {
             throw new NotAllowToEditEventException("Full info only for initiator");
@@ -216,7 +216,7 @@ public class EventService {
         String start = eventFullDto.getCreatedOn().format(DATE_TIME_FORMATTER);
         String end = LocalDateTime.now().format(DATE_TIME_FORMATTER);
 
-        eventFullDto.setConfirmedRequests(requestRepository.countRequestByStatusEqualsAndEvent_Id
+        eventFullDto.setConfirmedRequests(requestRepository.countRequestByStatusEqualsAndEventId
                 (RequestStatus.CONFIRMED, eventId));
         List<Long> stats = getStatsList(start, end, List.of(uri), false);
 
@@ -233,7 +233,7 @@ public class EventService {
         String start = eventShortDto.getCreatedOn().format(DATE_TIME_FORMATTER);
         String end = LocalDateTime.now().format(DATE_TIME_FORMATTER);
 
-        eventShortDto.setConfirmedRequests(requestRepository.countRequestByStatusEqualsAndEvent_Id
+        eventShortDto.setConfirmedRequests(requestRepository.countRequestByStatusEqualsAndEventId
                 (RequestStatus.CONFIRMED, eventShortDto.getId()));
         List<Long> stats = getStatsList(start, end, List.of(uri), false);
 

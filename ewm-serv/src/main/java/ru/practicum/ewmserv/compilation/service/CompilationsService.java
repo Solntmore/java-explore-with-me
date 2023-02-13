@@ -156,7 +156,7 @@ public class CompilationsService {
         String start = eventShortDto.getCreatedOn().format(DATE_TIME_FORMATTER);
         String end = LocalDateTime.now().format(DATE_TIME_FORMATTER);
 
-        eventShortDto.setConfirmedRequests(requestRepository.countRequestByStatusEqualsAndEvent_Id
+        eventShortDto.setConfirmedRequests(requestRepository.countRequestByStatusEqualsAndEventId
                 (RequestStatus.CONFIRMED, eventShortDto.getId()));
         List<Long> stats = getStatsList(start, end, List.of(uri), false);
 
