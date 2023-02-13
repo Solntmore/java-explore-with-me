@@ -14,8 +14,8 @@ public interface EventRepository extends JpaRepository<Event, Long>, EventReposi
 
     Event patchEventByUser(long userId, long eventId, EventPatchDto updateEvent, Event event);
 
-    Page<Event> findAllByInitiator_Id(Long userId, Pageable pageable);
+    Page<Event> findAllByInitiatorId(Long userId, Pageable pageable);
 
-    Event findByIdAndInitiator_Id(Long eventId, Long userId);
+    Event findByIdAndInitiatorId(Long eventId, Long userId);
 
 }

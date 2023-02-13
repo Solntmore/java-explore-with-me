@@ -3,7 +3,6 @@ package ru.practicum.ewmserv.user.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import ru.practicum.ewmserv.category.exceptions.SqlConstraintViolationException;
 import ru.practicum.ewmserv.user.dto.RequestUserDto;
 import ru.practicum.ewmserv.user.dto.ResponseUserDto;
 import ru.practicum.ewmserv.user.exceptions.UserNotFoundException;
@@ -11,7 +10,6 @@ import ru.practicum.ewmserv.user.mapper.UserMapper;
 import ru.practicum.ewmserv.user.model.User;
 import ru.practicum.ewmserv.user.repository.UserRepository;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -26,15 +24,11 @@ public class UserService {
     private final UserMapper userMapper;
 
 
-    public ResponseUserDto postUser(RequestUserDto requestUserDto) {
-        try {
-            User user = userRepository.save(
-                    userMapper.toEntity(requestUserDto));
+    public ResponseUserDto addUser(RequestUserDto requestUserDto) {
+        User user = userRepository.save(
+                userMapper.toEntity(requestUserDto));
 
-            return userMapper.toDto(user);
-        } catch (RuntimeException e) {
-            throw new SqlConstraintViolationException(e.getMessage());
-        }
+        return userMapper.toDto(user);
     }
 
     public void deleteUser(long userId) {
@@ -44,10 +38,10 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
-    public ArrayList<ResponseUserDto> getUsers(Integer[] ids, PageRequest pageRequest) {
+    public List<ResponseUserDto> getUsers(Integer[] ids, PageRequest pageRequest) {
         Collection<Long> idList = Arrays.stream(ids).map(Integer::longValue).collect(Collectors.toList());
         List<User> users = userRepository.getUsers(idList, pageRequest).getContent();
 
-        return (ArrayList<ResponseUserDto>) users.stream().map(userMapper::toDto).collect(Collectors.toList());
+        return users.stream().map(userMapper::toDto).collect(Collectors.toList());
     }
 }

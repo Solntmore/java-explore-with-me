@@ -6,6 +6,7 @@ import ru.practicum.ewmserv.compilation.model.Compilation;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A DTO for the {@link Compilation} entity
@@ -16,5 +17,5 @@ public class RequestCompilationDto implements Serializable {
     private final Boolean pinned;
     @NotEmpty
     private final String title;
-    private ArrayList<Long> events;
+    private List<Long> events;
 }

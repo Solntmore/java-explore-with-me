@@ -46,7 +46,7 @@ public class RequestServise {
             throw new NotAllowTakeRequestException("Initiator not allow to be a requester");
         }
 
-        if (requestRepository.existsByRequester_IdAndEvent_Id(userId, eventId)) {
+        if (requestRepository.existsByRequester_IdAndEventId(userId, eventId)) {
             throw new NotAllowTakeRequestException("Requester not allow to make more then 1 request");
         }
 
@@ -98,7 +98,7 @@ public class RequestServise {
         }
 
         return (ArrayList<ResponseRequestDto>) requestRepository
-                .findAllByRequester_Id(userId)
+                .findAllByRequesterId(userId)
                 .stream()
                 .map(requestMapper::toDto)
                 .collect(Collectors.toList());
@@ -117,7 +117,7 @@ public class RequestServise {
         }
 
         return (ArrayList<ResponseRequestDto>) requestRepository
-                .findAllByEvent_Id(eventId)
+                .findAllByEventId(eventId)
                 .stream()
                 .map(requestMapper::toDto)
                 .collect(Collectors.toList());
@@ -143,7 +143,7 @@ public class RequestServise {
                 throw new NotAllowTakeRequestException("Sorry, but the limit of participants is exhausted");
             }
 
-            Request request = requestRepository.findByIdAndEvent_Id(id, eventId).orElseThrow(() ->
+            Request request = requestRepository.findByIdAndEventId(id, eventId).orElseThrow(() ->
                     new RequestNotFoundException("Request with id=" + id + " for event with id=" + " was not found"));
 
             if (!request.getStatus().equals(RequestStatus.PENDING)) {

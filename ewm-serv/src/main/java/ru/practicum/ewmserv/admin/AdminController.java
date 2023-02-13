@@ -37,10 +37,10 @@ public class AdminController {
     private final CompilationsService compilationsService;
 
     @PostMapping("/categories")
-    public ResponseEntity<ResponseCategoryDto> postCategory(@RequestBody @Valid RequestCategoryDto requestCategoryDto) {
+    public ResponseEntity<ResponseCategoryDto> addCategory(@RequestBody @Valid RequestCategoryDto requestCategoryDto) {
         log.debug("A Post/admin request was received. Post category");
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.postCategory(requestCategoryDto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.addCategory(requestCategoryDto));
     }
 
     @DeleteMapping("/categories/{catId}")
@@ -52,15 +52,15 @@ public class AdminController {
     }
 
     @PatchMapping("/categories/{catId}")
-    public ResponseEntity<ResponseCategoryDto> patchCategory(@PathVariable long catId,
-                                                             @RequestBody @Valid RequestCategoryDto requestCategoryDto) {
+    public ResponseEntity<ResponseCategoryDto> updateCategory(@PathVariable long catId,
+                                                              @RequestBody @Valid RequestCategoryDto requestCategoryDto) {
         log.debug("A Patch/admin/categories/{} request was received. Patch category", catId);
 
-        return ResponseEntity.status(HttpStatus.OK).body(categoryService.patchCategory(catId, requestCategoryDto));
+        return ResponseEntity.status(HttpStatus.OK).body(categoryService.updateCategory(catId, requestCategoryDto));
     }
 
     @GetMapping("/events")
-    public ResponseEntity<ArrayList<EventFullDto>> getEvents(@RequestParam(required = false) List<Long> users,
+    public ResponseEntity<List<EventFullDto>> getEvents(@RequestParam(required = false) List<Long> users,
                                                              @RequestParam(required = false) List<StateAction> states,
                                                              @RequestParam(required = false) List<Long> categories,
                                                              @RequestParam(required = false) String rangeStart,
@@ -74,14 +74,14 @@ public class AdminController {
     }
 
     @PatchMapping("/events/{eventId}")
-    public EventFullDto patchEventById(@PathVariable long eventId, @RequestBody UpdateEventAdminDto updateEventAdminDto) {
+    public EventFullDto updateEventById(@PathVariable long eventId, @RequestBody UpdateEventAdminDto updateEventAdminDto) {
         log.debug("A Patch/admin/events/{} request was received. Patch event by id", eventId);
 
-        return eventService.patchEventById(eventId, updateEventAdminDto);
+        return eventService.updateEventById(eventId, updateEventAdminDto);
     }
 
     @GetMapping("/users")
-    public ResponseEntity<ArrayList<ResponseUserDto>> getUsers(@RequestParam(name = "ids") Integer[] ids,
+    public ResponseEntity<List<ResponseUserDto>> getUsers(@RequestParam(name = "ids") Integer[] ids,
                                                                @RequestParam(required = false, defaultValue = "0") int from,
                                                                @RequestParam(required = false, defaultValue = "10")
                                                                int size) {
@@ -91,10 +91,10 @@ public class AdminController {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<ResponseUserDto> postUser(@RequestBody @Valid RequestUserDto requestUserDto) {
+    public ResponseEntity<ResponseUserDto> addUser(@RequestBody @Valid RequestUserDto requestUserDto) {
         log.debug("A Post/admin/users request was received. Post user {}", requestUserDto);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.postUser(requestUserDto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.addUser(requestUserDto));
     }
 
     @DeleteMapping("/users/{userId}")
@@ -106,12 +106,12 @@ public class AdminController {
     }
 
     @PostMapping("/compilations")
-    public ResponseEntity<ResponseCompilationDto> postCompilations(
+    public ResponseEntity<ResponseCompilationDto> addCompilations(
             @RequestBody @Valid RequestCompilationDto requestCompilationDto) {
         log.debug("A Post/admin/compilations request was received. Post compilations");
 
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(compilationsService.postCompilation(requestCompilationDto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(compilationsService.addCompilation(requestCompilationDto));
 
     }
 
@@ -129,7 +129,7 @@ public class AdminController {
         log.debug("A Patch/admin/compilations/{} request was received. Patch compilations", compId);
 
         return ResponseEntity.status(HttpStatus.OK).body(
-                compilationsService.patchCompilation(compId, requestCompilationDto));
+                compilationsService.updateCompilation(compId, requestCompilationDto));
     }
 }
 

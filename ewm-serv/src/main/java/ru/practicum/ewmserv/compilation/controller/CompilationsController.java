@@ -9,6 +9,7 @@ import ru.practicum.ewmserv.compilation.dto.ResponseCompilationDto;
 import ru.practicum.ewmserv.compilation.service.CompilationsService;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -19,7 +20,7 @@ public class CompilationsController {
     private final CompilationsService compilationsService;
 
     @GetMapping
-    public ResponseEntity<ArrayList<ResponseCompilationDto>> getCompilations(
+    public ResponseEntity<List<ResponseCompilationDto>> getCompilations(
             @RequestParam(required = false, defaultValue = "false") Boolean pinned,
             @RequestParam(required = false, defaultValue = "0") int from,
             @RequestParam(required = false, defaultValue = "10") int size) {
