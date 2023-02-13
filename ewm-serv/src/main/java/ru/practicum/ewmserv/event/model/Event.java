@@ -2,7 +2,6 @@ package ru.practicum.ewmserv.event.model;
 
 import lombok.*;
 import ru.practicum.ewmserv.category.model.Category;
-import ru.practicum.ewmserv.comment.model.Comment;
 import ru.practicum.ewmserv.compilation.model.Compilation;
 import ru.practicum.ewmserv.enums.StateAction;
 import ru.practicum.ewmserv.user.model.User;
@@ -72,9 +71,6 @@ public class Event {
 
     @ManyToMany(mappedBy = "eventList")
     private Set<Compilation> compilations;
-
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
-    private Set<Comment> comments;
 
 
 }
