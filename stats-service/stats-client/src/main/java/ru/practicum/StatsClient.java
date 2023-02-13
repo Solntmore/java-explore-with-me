@@ -1,38 +1,51 @@
 package ru.practicum;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import lombok.AllArgsConstructor;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
-public class StatsClient extends BaseClient {
-    private static final String API_PREFIX = "/hit";
+@AllArgsConstructor
+public class StatsClient {
 
-    @Autowired
-    public StatsClient(@Value("${stats-service.url}") String serverUrl, RestTemplateBuilder builder) {
-        super(
-                builder
-                        .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
-                        .requestFactory(HttpComponentsClientHttpRequestFactory::new)
-                        .build()
-        );
+    private final RestTemplate restTemplate;
+
+    private final String mainUrl;
+
+    public List<Long> getStats(String start, String end, Collection<String> uris, boolean unique) {
+        String statsResourceUrl = mainUrl + "/stats";
+        String parameters = "?start=" + start +
+                "&end=" + end +
+                "&uris=" + uris.toString() +
+                "&unique=" + unique;
+
+        ResponseEntity<List<ViewStats>> responseEntity = restTemplate.exchange(statsResourceUrl + parameters,
+                HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+                });
+
+        List<ViewStats> stats = responseEntity.getBody();
+
+        if (stats == null || stats.isEmpty()) {
+            return new ArrayList<>();
+        } else {
+            return stats.stream()
+                    .map(ViewStats::getHits)
+                    .collect(Collectors.toList());
+        }
     }
 
-    public ResponseEntity<Object> getStats(String start, String end, Collection<String> uris, boolean unique) {
-        Map<String, Object> parameters = Map.of(
-                "start", start,
-                "end", end,
-                "uris", uris,
-                "unique", unique
-        );
-
-        return get("", parameters);
+    public void saveRequest(RequestHitDto requestHitDto) {
+        String statsResourceUrl = mainUrl + "/hit";
+        HttpEntity<RequestHitDto> request = new HttpEntity<>(requestHitDto);
+        restTemplate.postForEntity(statsResourceUrl, request, RequestHitDto.class);
     }
 }

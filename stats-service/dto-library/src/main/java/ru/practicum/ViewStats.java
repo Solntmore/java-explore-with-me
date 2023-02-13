@@ -1,11 +1,19 @@
 package ru.practicum;
 
+import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.jackson.Jacksonized;
+
+import java.io.Serializable;
 
 @Getter
 @Setter
-public class ViewStats {
+@Builder
+@Jacksonized
+@Data
+public class ViewStats implements Serializable {
     private String app;
     private String uri;
     private Long hits;

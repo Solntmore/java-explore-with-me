@@ -3,6 +3,7 @@ package ru.practicum.statservice.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.RequestHitDto;
+import ru.practicum.ResponseHitDto;
 import ru.practicum.ViewStats;
 import ru.practicum.statservice.mappers.HitMapper;
 import ru.practicum.statservice.model.Hit;
@@ -23,38 +24,44 @@ public class StatsService {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 
-    public void saveRequest(RequestHitDto requestHitDto) {
+    public ResponseHitDto saveRequest(RequestHitDto requestHitDto) {
         Hit hit = hitMapper.toHitEntity(requestHitDto);
         LocalDateTime created = LocalDateTime.parse(requestHitDto.getTimestamp(), formatter);
         hit.setCreated(created);
-        hitRepository.save(hit);
+        return hitMapper.toDto(hitRepository.save(hit));
     }
 
     public ArrayList<ViewStats> getStats(LocalDateTime start, LocalDateTime end, boolean unique,
                                          Collection<String> uris) {
-        if (!uris.isEmpty()) {
+        if (uris.isEmpty()) {
             if (unique) {
+
                 return (ArrayList<ViewStats>) hitRepository.getUniqueHitsBetweenDays(start, end)
                         .stream()
                         .map(hitMapper::toViewStatsEntity)
                         .collect(Collectors.toList());
             }
-            return (ArrayList<ViewStats>) hitRepository.getHitsBetweenDays(start, end)
+
+            return (ArrayList<ViewStats>) hitRepository
+                    .getHitsBetweenDays(start, end)
                     .stream()
                     .map(hitMapper::toViewStatsEntity)
                     .collect(Collectors.toList());
         }
 
         if (unique) {
-            return (ArrayList<ViewStats>) hitRepository.getHitsUniqueBetweenDaysFromUriList(start, end, uris)
+
+            return (ArrayList<ViewStats>) hitRepository
+                    .getHitsUniqueBetweenDaysFromUriList(start, end, uris)
                     .stream()
                     .map(hitMapper::toViewStatsEntity)
                     .collect(Collectors.toList());
         }
-        return (ArrayList<ViewStats>) hitRepository.getHitsBetweenDaysFromUriList(start, end, uris)
+
+        return (ArrayList<ViewStats>) hitRepository
+                .getHitsBetweenDaysFromUriList(start, end, uris)
                 .stream()
                 .map(hitMapper::toViewStatsEntity)
                 .collect(Collectors.toList());
-
     }
 }
