@@ -15,8 +15,5 @@ public interface CategoryMapper {
 
     ResponseCategoryDto toDto(Category category);
 
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    Category partialUpdate1(ResponseCategoryDto responseCategoryDto, @MappingTarget Category category);
 
-    Category toEntity1(ResponseCategoryDto responseCategoryDto);
 }
