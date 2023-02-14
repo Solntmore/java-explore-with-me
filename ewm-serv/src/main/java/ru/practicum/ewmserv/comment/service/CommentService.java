@@ -46,7 +46,7 @@ public class CommentService {
         return commentMapper.toDto(commentRepository.save(newComment));
     }
 
-    public void deleteComment(long userId, long commentId) {
+    public void userDeleteComment(long userId, long commentId) {
         if (!userRepository.existsById(userId)) {
             throw new UserNotFoundException("User with id " + userId + " not found");
         }
@@ -62,6 +62,14 @@ public class CommentService {
             throw new NotAllowToEditCommentException("User is not allow to delete comment if after publication spent " +
                     "more then 24 hours");
         }
+        commentRepository.deleteById(commentId);
+    }
+
+    public void adminDeleteComment(long commentId) {
+        if (!commentRepository.existsById(commentId)) {
+            throw new CommentNotFoundException("Comment with id " + commentId + " not found");
+        }
+
         commentRepository.deleteById(commentId);
     }
 
@@ -86,5 +94,4 @@ public class CommentService {
 
         return commentMapper.toDto(commentRepository.save(comment));
     }
-
 }

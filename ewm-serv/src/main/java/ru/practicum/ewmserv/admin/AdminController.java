@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewmserv.category.dto.RequestCategoryDto;
 import ru.practicum.ewmserv.category.dto.ResponseCategoryDto;
 import ru.practicum.ewmserv.category.service.CategoryService;
+import ru.practicum.ewmserv.comment.service.CommentService;
 import ru.practicum.ewmserv.compilation.dto.RequestCompilationDto;
 import ru.practicum.ewmserv.compilation.dto.ResponseCompilationDto;
 import ru.practicum.ewmserv.compilation.service.CompilationsService;
@@ -21,7 +22,6 @@ import ru.practicum.ewmserv.user.dto.ResponseUserDto;
 import ru.practicum.ewmserv.user.service.UserService;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -33,7 +33,7 @@ public class AdminController {
     private final UserService userService;
     private final CategoryService categoryService;
     private final EventService eventService;
-
+    private final CommentService commentService;
     private final CompilationsService compilationsService;
 
     @PostMapping("/categories")
@@ -61,12 +61,12 @@ public class AdminController {
 
     @GetMapping("/events")
     public ResponseEntity<List<EventFullDto>> getEvents(@RequestParam(required = false) List<Long> users,
-                                                             @RequestParam(required = false) List<StateAction> states,
-                                                             @RequestParam(required = false) List<Long> categories,
-                                                             @RequestParam(required = false) String rangeStart,
-                                                             @RequestParam(required = false) String rangeEnd,
-                                                             @RequestParam(required = false, defaultValue = "0") int from,
-                                                             @RequestParam(required = false, defaultValue = "10") int size) {
+                                                        @RequestParam(required = false) List<StateAction> states,
+                                                        @RequestParam(required = false) List<Long> categories,
+                                                        @RequestParam(required = false) String rangeStart,
+                                                        @RequestParam(required = false) String rangeEnd,
+                                                        @RequestParam(required = false, defaultValue = "0") int from,
+                                                        @RequestParam(required = false, defaultValue = "10") int size) {
         log.debug("A Get/admin/events request was received. Get events");
 
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsForAdmin(users, states, categories,
@@ -82,9 +82,9 @@ public class AdminController {
 
     @GetMapping("/users")
     public ResponseEntity<List<ResponseUserDto>> getUsers(@RequestParam(name = "ids") Integer[] ids,
-                                                               @RequestParam(required = false, defaultValue = "0") int from,
-                                                               @RequestParam(required = false, defaultValue = "10")
-                                                               int size) {
+                                                          @RequestParam(required = false, defaultValue = "0") int from,
+                                                          @RequestParam(required = false, defaultValue = "10")
+                                                          int size) {
         log.debug("A Get/admin/users request was received. Get users with ids {}", ids);
 
         return ResponseEntity.status(HttpStatus.OK).body(userService.getUsers(ids, PageRequest.of(from, size)));
@@ -130,6 +130,14 @@ public class AdminController {
 
         return ResponseEntity.status(HttpStatus.OK).body(
                 compilationsService.updateCompilation(compId, requestCompilationDto));
+    }
+
+    @DeleteMapping("/comment/{commentId}")
+    public ResponseEntity<Void> deleteComment(@PathVariable long commentId) {
+        log.debug("A Delete/admin/comment/{} request was received. Admin delete comment {}", commentId, commentId);
+        commentService.adminDeleteComment(commentId);
+
+        return ResponseEntity.status(204).build();
     }
 }
 

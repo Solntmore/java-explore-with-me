@@ -133,7 +133,7 @@ public class UsersController {
     public ResponseEntity<Void> deleteComment(@PathVariable long userId, @PathVariable long commentId) {
         log.debug("A Delete/users/{}/comment/{} request was received. User {} delete comment {}", userId, commentId,
                 userId, commentId);
-        commentService.deleteComment(userId, commentId);
+        commentService.userDeleteComment(userId, commentId);
 
         return ResponseEntity.status(204).build();
     }
