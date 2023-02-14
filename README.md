@@ -1,5 +1,5 @@
 # java-explore-with-me
 Template repository for ExploreWithMe project.
 
-Для просмотра энд-поинтов сервиса статистики вы можете воспользоваться сваггером: 
-http://localhost:9090/swagger-ui/index.html#/
+Ссылка на pull-request
+https://github.com/Solntmore/java-explore-with-me/pull/5
