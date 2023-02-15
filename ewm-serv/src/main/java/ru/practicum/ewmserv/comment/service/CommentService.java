@@ -40,16 +40,14 @@ public class CommentService {
             throw new NotAllowToCreateCommentException("User allow comment only published events");
         }
 
-        Comment newComment = Comment.builder().created(LocalDateTime.now()).text(comment.getText())
-                .author(user).event(event).build();
+        Comment newComment = Comment.builder().created(LocalDateTime.now()).text(comment.getText()).author(user)
+                .event(event).build();
 
         return commentMapper.toDto(commentRepository.save(newComment));
     }
 
     public void userDeleteComment(long userId, long commentId) {
-        if (!userRepository.existsById(userId)) {
-            throw new UserNotFoundException("User with id " + userId + " not found");
-        }
+        isUserExist(userId);
 
         Comment comment = commentRepository.findById(commentId).orElseThrow(() ->
                 new CommentNotFoundException("Comment with id " + commentId + " not found"));
@@ -74,9 +72,7 @@ public class CommentService {
     }
 
     public ResponseCommentDto updateComment(long userId, long commentId, PatchCommentDto patchComment) {
-        if (!userRepository.existsById(userId)) {
-            throw new UserNotFoundException("User with id " + userId + " not found");
-        }
+        isUserExist(userId);
 
         Comment comment = commentRepository.findById(commentId).orElseThrow(() ->
                 new CommentNotFoundException("Comment with id " + commentId + " not found"));
@@ -93,5 +89,11 @@ public class CommentService {
         comment.setText(patchComment.getText());
 
         return commentMapper.toDto(commentRepository.save(comment));
+    }
+
+    private void isUserExist(long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new UserNotFoundException("User with id " + userId + " not found");
+        }
     }
 }
