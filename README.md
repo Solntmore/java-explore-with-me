@@ -1,5 +1,11 @@
 # java-explore-with-me
 
-Проект на Spring Boot с многомодульной архитектурой, поддерживает Rest API интерфейс. 
-Hibernate, JPA repository, PostgreSQL.
+Проект на Spring Boot с многомодульной архитектурой, поддерживает Rest API интерфейс, сборщик Maven. Hibernate, JPA repository, PostgreSQL, MapStruct.
 Контейнеризация через Docker.
+
+Explore-with-me - сервис для публикации и поиска публичных мероприятий в городе.
+Спецификация: https://raw.githubusercontent.com/yandex-praktikum/java-explore-with-me/main/ewm-main-service-spec.json
+
+Внедрил использование библиотеки MapStruct, что позволило сократить время написания кода за счет автоматизации создания мапперов. Также использовал плагин JPA Buddy, что сократило время на создание DTO.
+
+Для тестирования функционала вы можете загрузить zip-файл приложения, открыть в удобной IDE, проверить, что файл с зависимостями успешно загрузил нужные данные, нажать build и запустить оба модуля приложения поочередно(Сналача Gateway, затем Server). Для упаковки в Docker контейнер предварительно выполните package в Maven.
