@@ -1,5 +1,5 @@
 # java-explore-with-me
-Template repository for ExploreWithMe project.
 
-Ссылка на pull-request
-https://github.com/Solntmore/java-explore-with-me/pull/5
+Проект на Spring Boot с многомодульной архитектурой, поддерживает Rest API интерфейс. 
+Hibernate, JPA repository, PostgreSQL.
+Контейнеризация через Docker.
